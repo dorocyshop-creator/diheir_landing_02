@@ -16,7 +16,7 @@ diheir_landing/
 ├─ rule.md
 └─ component/
    ├─ font/
-   │  ├─ DreamAvenue/          ← font.woff2, font.woff 미제공 (아래 7번 참고)
+   │  ├─ DreamAvenue/font.woff2, font.woff (Dream Avenue 영문 웹폰트 적용 완료)
    │  └─ NotoSerifKR/NotoSerifKR-VF.ttf
    └─ img/
       ├─ 01_section_introNcustom/
@@ -117,7 +117,7 @@ diheir_landing/
 
 ## 9. 미제공 에셋과 추가 확인 사항
 **미제공 에셋** (임의 이미지로 대체하지 않았습니다)
-- `component/font/DreamAvenue/font.woff2`, `font.woff`: 이 Make 파일에서 Dream Avenue Regular를 가져오지 못했습니다(`not_found`). 파일을 넣기 전까지는 브라우저 기본 serif로 표시되고, 이 경로에서 404가 발생합니다. 그래서 영문 제목의 폭이 시안과 다를 수 있습니다.
+- `component/font/DreamAvenue/font.woff2`, `font.woff`: Dream Avenue Regular 영문 웹폰트 적용 완료.
 - 02 컬렉션 카드 이미지: `component/img/02_section_collection/01.png` ~ `09.png` 9종 적용 완료.
   - PC 환경: 4개 컬렉션 바디 단위(LOV, Heirbound, CONCORE, SPIRAL) 무한 슬라이더 및 호버 인터랙션(오버레이 및 제품명 표시).
   - 모바일 환경: 01~09 총 9개 카드가 연속해서 흐르는 단일 무한 가로 슬라이더/스크롤 트랙. 터치 스와이프 및 드래그, 하단 좌우 컨트롤 버튼(`<`, `>`)과 9단계 프로그레스 바 연동. 카드 하단에 제품명 및 그라디언트 오버레이 상시 고정.
