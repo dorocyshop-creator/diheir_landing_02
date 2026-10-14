@@ -737,7 +737,7 @@
 .diheir-floating__cta { display: block; height: calc(var(--u) * 80); background: rgba(23, 23, 17, 0.6); color: #fff; }
 .diheir-floating__cta img { position: absolute; left: calc(50% - var(--u) * 61); top: calc(50% + var(--u) * 1.5 - var(--u) * 15.5); width: calc(var(--u) * 100); height: calc(var(--u) * 31); }
 .diheir-floating__cta span { position: absolute; left: 71.67%; top: 56.25%; font-size: calc(var(--u) * 16); line-height: 1; letter-spacing: calc(var(--u) * -0.32); white-space: nowrap; }
-.diheir-floating__mo { position: absolute; bottom: 40px; right: max(16px, calc(var(--u) * 32)); width: clamp(80px, calc(var(--u) * 139), 139px); aspect-ratio: 139 / 122; pointer-events: auto; }
+.diheir-floating__mo { position: absolute; bottom: 40px; right: max(16px, calc(var(--u) * 32)); width: 139px; aspect-ratio: 139 / 122; pointer-events: auto; }
 .diheir-floating__mo img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ---------- 08_Section_footer ---------- */
@@ -1177,6 +1177,13 @@
   .diheir-cal__empty {
     height: 34px;
   }
+}
+
+@media (max-width: 430px) {
+  .diheir-floating__mo { width: 100px; }
+}
+@media (max-width: 400px) {
+  .diheir-floating__mo { width: 80px; }
 }
 </style>
 </head>
