@@ -1,0 +1,2763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DIHEIR | Customized Diheir - 예약 / 상담</title>
+<style>
+/* =========================================================
+   Fonts
+   - DreamAvenue: component/font/DreamAvenue/font.woff2, font.woff (파일 미제공 → README 참고)
+   - Noto Serif KR: component/font/NotoSerifKR/NotoSerifKR-VF.ttf (가변 폰트 200~900)
+   ========================================================= */
+@font-face {
+  font-family: "DreamAvenue";
+  src: url("component/font/DreamAvenue/font.woff2") format("woff2"),
+       url("component/font/DreamAvenue/font.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif KR";
+  src: url("component/font/NotoSerifKR/NotoSerifKR-VF.ttf") format("truetype");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =========================================================
+   Wrapper (메이크샵 공통 CSS와 분리 — 모든 스타일은 .diheir-wrap 내부로 한정)
+   --u : 디자인 1px. PC 시안 1920 / 모바일 시안 768 기준으로 유동 계산
+   ========================================================= */
+.diheir-wrap {
+  container-type: inline-size;
+  --u: min(1px, calc(100cqw / 1920));
+  position: relative;
+  width: 100%;
+  overflow-x: clip;
+  background: #2e2d23;
+  color: #fff;
+  font-family: "Noto Serif KR", serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+}
+.diheir-wrap *, .diheir-wrap *::before, .diheir-wrap *::after { box-sizing: border-box; }
+:where(.diheir-wrap) :is(p, h1, h2, h3, ul, li, figure) { margin: 0; padding: 0; }
+:where(.diheir-wrap) ul { list-style: none; }
+.diheir-wrap img { display: block; max-width: none; }
+.diheir-wrap a { color: inherit; text-decoration: none; }
+:where(.diheir-wrap) button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.diheir-wrap :focus-visible { outline: 2px solid #f1f2cf; outline-offset: 3px; }
+.diheir-en { font-family: "DreamAvenue", serif; font-weight: 400; font-synthesis: none; }
+.diheir-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.diheir-nowrap { white-space: nowrap; }
+.diheir-pc-only { display: block; }
+.diheir-mo-only { display: none; }
+.diheir-br-mo { display: none; }
+.diheir-pc-nowrap { white-space: nowrap; }
+
+/* ---------- 상단 배너 (diheir_bene_az) / nav ---------- */
+.diheir-bene {
+  position: fixed; top: 0; left: 0; width: 100%; height: calc(var(--u) * 60); background: #171711; z-index: 40;
+  display: grid; justify-items: center; padding-top: calc(var(--u) * 20);
+  cursor: pointer; transition: background-color 0.2s ease;
+}
+.diheir-bene:hover { background-color: #24241b; }
+.diheir-bene__txt { grid-area: 1 / 1; opacity: 0; transition: opacity 0.5s ease; cursor: pointer; }
+.diheir-bene__txt.is-active { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .diheir-bene__txt { transition: none; } }
+.diheir-bene__txt { font-size: max(12px, calc(var(--u) * 20)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.4); color: #a6a688; white-space: nowrap; }
+.diheir-nav {
+  position: fixed; top: calc(var(--u) * 60); left: 0; width: 100%; z-index: 40;
+  padding: calc(var(--u) * 32) calc(var(--u) * 80);
+  background: rgba(17, 17, 17, 0.24);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.diheir-nav__menu-wrap { position: relative; }
+.diheir-nav__menu { width: calc(var(--u) * 72); height: calc(var(--u) * 72); }
+.diheir-nav__menu img { width: 100%; height: 100%; }
+
+/* nav CTA & Hover Highlight */
+.diheir-nav__cta-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.diheir-nav__cta {
+  width: calc(var(--u) * 293);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #6c682e;
+  padding: calc(var(--u) * 20) calc(var(--u) * 24);
+  font-size: max(12px, calc(var(--u) * 28));
+  font-weight: 400;
+  line-height: normal;
+  color: #fff;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.diheir-nav__highlight {
+  position: absolute;
+  top: calc(100% + calc(var(--u) * 16));
+  right: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  padding: calc(var(--u) * 8) calc(var(--u) * 24);
+  justify-content: center;
+  align-items: center;
+  background: #C56220;
+  text-decoration: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(calc(var(--u) * -6));
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+  z-index: 50;
+}
+.diheir-nav__highlight::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--u) * -18);
+  left: 0;
+  width: 100%;
+  height: calc(var(--u) * 20);
+}
+@media (hover: hover) and (pointer: fine) {
+  .diheir-nav__cta-wrap:hover .diheir-nav__highlight {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+.diheir-nav__highlight p {
+  margin: 0;
+  color: #FFF;
+  font-family: "Noto Serif KR", serif;
+  font-size: max(12px, calc(var(--u) * 20));
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* 드롭다운 메뉴 (Drop_Menu) - resv__box와 동일한 글라스 효과, 최소 글자 크기 12px 초과 유지 */
+.diheir-dropdown {
+  --drop-u: max(calc(12.5px / 24), min(1px, calc(100cqw / 1920)));
+  position: absolute; top: calc(100% + calc(var(--u) * 16)); left: 0; z-index: 50;
+  width: calc(var(--drop-u) * 207);
+  background: rgba(170, 166, 128, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: calc(var(--drop-u) * 32);
+  -webkit-backdrop-filter: blur(calc(var(--drop-u) * 20));
+  backdrop-filter: blur(calc(var(--drop-u) * 20));
+  padding: calc(var(--drop-u) * 36) calc(var(--drop-u) * 28);
+  box-shadow: 0 calc(var(--drop-u) * 12) calc(var(--drop-u) * 32) rgba(0, 0, 0, 0.25);
+  display: flex; flex-direction: column; align-items: flex-start;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(calc(var(--drop-u) * -10));
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+/* 투명 브릿지 영역을 두어 버튼과 메뉴 사이 마우스 이동 시 끊김 방지 */
+.diheir-dropdown::before {
+  content: ""; position: absolute; top: calc(var(--u) * -18); left: 0; width: 100%; height: calc(var(--u) * 20);
+}
+.diheir-dropdown.is-open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translateY(0);
+}
+/* PC 마우스 호버 지원 */
+@media (hover: hover) and (pointer: fine) {
+  .diheir-nav__menu-wrap:hover .diheir-dropdown {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+.diheir-dropdown__list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--drop-u) * 16);
+  width: 100%;
+}
+.diheir-dropdown__item { width: 100%; text-align: left; }
+.diheir-dropdown__link {
+  display: block; width: 100%; text-decoration: none; text-align: left;
+  color: #FFF;
+  font-family: "Dream Avenue", "DreamAvenue", serif;
+  font-size: calc(var(--drop-u) * 24);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.diheir-dropdown__link:hover, .diheir-dropdown__link:focus-visible {
+  opacity: 0.75;
+  transform: translateX(calc(var(--drop-u) * 4));
+}
+@media (prefers-reduced-motion: reduce) {
+  .diheir-dropdown, .diheir-dropdown__link { transition: none; }
+}
+
+/* ---------- 01_section_introNcustom ---------- */
+.diheir-intro { position: relative; padding-top: calc(var(--u) * 760); background: #2e2d23; overflow: hidden; }
+.diheir-intro__arch {
+  position: relative;
+  z-index: 2;
+  min-height: calc(var(--u) * 1680);
+  padding: calc(var(--u) * 240) calc(var(--u) * 336) calc(var(--u) * 452);
+  border: 0 none rgba(0, 0, 0, 0);
+  border-radius: 9999px 9999px 0 0;
+  background: linear-gradient(180deg, #909073 65.34%, #2e2d23 99.014%);
+  display: flex; flex-direction: column; align-items: center;
+}
+.diheir-intro__inner { width: calc(var(--u) * 1248); display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 80); }
+.diheir-intro__head { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.diheir-intro__eternal {
+  position: relative; z-index: 1; width: 100%; text-align: center;
+  height: calc(var(--u) * 182); margin-bottom: calc(var(--u) * -100);
+  font-size: calc(var(--u) * 140); line-height: 1.3; letter-spacing: calc(var(--u) * -2.8);
+  color: rgba(46, 45, 35, 0.48);
+}
+.diheir-intro__ring {
+  width: 100%; height: calc(var(--u) * 789); margin-bottom: calc(var(--u) * -100);
+  padding: calc(var(--u) * 134) calc(var(--u) * 160) calc(var(--u) * 133);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(249, 249, 236, 0.26) 0%, rgba(239, 239, 222, 0) 100%);
+}
+.diheir-intro__ring-frame { position: relative; width: calc(var(--u) * 928); height: calc(var(--u) * 522); overflow: hidden; }
+.diheir-intro__ring-frame img, .diheir-intro__ring-frame video, .diheir-intro__ring-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; pointer-events: none; }
+.diheir-intro__quote {
+  position: relative; width: 100%; text-align: center;
+  font-weight: 300; font-size: calc(var(--u) * 80); line-height: 1.3; letter-spacing: calc(var(--u) * -1.6); color: #f7f7ec;
+}
+.diheir-intro__desc {
+  text-align: center; white-space: nowrap;
+  font-weight: 300; font-size: max(12px, calc(var(--u) * 24)); line-height: 1.6; letter-spacing: calc(var(--u) * -0.48); color: rgba(247, 247, 236, 0.8);
+}
+
+/* 올리브 장식 (olive) */
+.diheir-olive { position: absolute; overflow: hidden; pointer-events: none; z-index: 1; }
+.diheir-olive picture, .diheir-olive img { position: absolute; display: block; }
+.diheir-olive__g1 { left: 0.01%; top: 0%; width: 100.00%; height: 67.77%; }
+.diheir-olive__g2 { left: 35.13%; top: 63.37%; width: 21.63%; height: 32.68%; }
+.diheir-olive__g3 { left: 0%; top: 0%; width: 136.37%; height: 148.59%; }
+.diheir-olive__g4 { left: 34.46%; top: 80.07%; width: 30.57%; height: 18.19%; }
+.diheir-olive__g5 { left: 1.17%; top: 6.75%; width: 95.69%; height: 93.29%; }
+.diheir-intro .diheir-olive { width: calc(var(--u) * 984); height: calc(var(--u) * 941); left: calc(50% - var(--u) * 922); top: calc(var(--u) * 142); }
+
+/* 타이틀 + 로고 (Customized / logp / Grace in Every Moment) */
+.diheir-hero {
+  position: absolute; left: 50%; top: calc(var(--u) * 338); z-index: 3;
+  width: calc(var(--u) * 720); margin-left: calc(var(--u) * -360);
+  display: flex; flex-direction: column; align-items: flex-end; gap: calc(var(--u) * 6);
+}
+.diheir-hero__customized { width: 100%; text-align: center; color: #fff; white-space: nowrap; line-height: 0.6; }
+.diheir-hero__c { font-size: calc(var(--u) * 160); letter-spacing: calc(var(--u) * -3.2); }
+.diheir-hero__rest { font-size: calc(var(--u) * 144); letter-spacing: calc(var(--u) * -2.88); }
+.diheir-logp { position: relative; width: 100%; aspect-ratio: 1075 / 334; overflow: hidden; }
+.diheir-logp picture, .diheir-logp img { position: absolute; display: block; }
+.diheir-logp img { inset: 0; width: 100%; height: 100%; }
+.diheir-logp__v1 { inset: 33.31% 24.93% 0 58.52%; }
+.diheir-logp__v2 { inset: 9.38% 64.94% 69.25% 28.51%; }
+.diheir-logp__v3 { inset: 9.38% 16.66% 69.25% 76.79%; }
+.diheir-logp__v4 { inset: 34.31% 15.7% 1.82% 75.86%; }
+.diheir-logp__v5 { inset: -0.01% 42.22% 1.8% 38.21%; }
+.diheir-logp__v6 { inset: 34.32% 64.04% 1.85% 27.52%; }
+.diheir-logp__v7 { inset: 93.08% 64.92% 6.16% 34.92%; }
+.diheir-logp__v8 { inset: 12.18% 74.12% 1.71% 0; }
+.diheir-logp__v9 { inset: 33.14% 0 1.82% 86.05%; }
+.diheir-hero__grace {
+  width: 100%; text-align: right;
+  font-size: calc(var(--u) * 40); line-height: 1.3; letter-spacing: calc(var(--u) * -0.8); color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- 공통: 큰 장식 영문 타이틀 ---------- */
+.diheir-deco { color: rgba(189, 190, 167, 0.3); line-height: normal; white-space: nowrap; }
+
+/* ---------- 슬라이더 공통 ---------- */
+.diheir-slider__track {
+  display: flex; overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+}
+.diheir-slider__track::-webkit-scrollbar { display: none; }
+.diheir-slider__track > * { scroll-snap-align: start; flex: none; }
+.diheir-arrow { width: calc(var(--u) * 40); height: calc(var(--u) * 40); flex: none; cursor: pointer; }
+.diheir-arrow img { width: 100%; height: 100%; pointer-events: none; }
+.diheir-arrow:disabled { cursor: default; opacity: 0.35; }
+.diheir-progress { position: relative; height: 2px; background: rgba(255, 255, 255, 0.4); }
+.diheir-progress__bar {
+  position: absolute; top: 0; left: 0; height: 2px; width: 33.333%; background: #191813;
+  transform: translateX(calc(var(--progress, 0) * 200%));
+}
+.diheir-drag { cursor: grab; }
+.diheir-drag.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+
+/* ---------- 02_section_collection ---------- */
+.diheir-collection { position: relative; height: calc(var(--u) * 1053); background: #2e2d23; }
+.diheir-collection__master { position: absolute; left: calc(50% - var(--u) * 879); top: calc(var(--u) * 127); font-size: calc(var(--u) * 230); }
+.diheir-collection__art { position: absolute; right: calc(50% - var(--u) * 871); top: calc(var(--u) * 238); font-size: calc(var(--u) * 300); text-align: right; }
+.diheir-collection__line { position: absolute; left: calc(50% + var(--u) * 408); top: calc(var(--u) * 195); width: calc(var(--u) * 452); height: calc(var(--u) * 4); background: rgba(189, 190, 167, 0.3); }
+.diheir-collection__stage {
+  position: absolute; left: calc(50% - var(--u) * 866); top: calc(var(--u) * 440); width: calc(var(--u) * 1731); height: calc(var(--u) * 560);
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none; touch-action: pan-y;
+  cursor: grab;
+}
+.diheir-collection__stage.is-dragging { cursor: grabbing; }
+.diheir-collection__body {
+  position: absolute; inset: 0;
+  padding: calc(var(--u) * 20); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * 16);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease, visibility 0.5s;
+}
+.diheir-collection__body.is-active {
+  opacity: 1; visibility: visible; pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .diheir-collection__body { transition: none; }
+}
+.diheir-collection__title { font-size: calc(var(--u) * 56); line-height: normal; color: #bdbea7; white-space: nowrap; text-align: center; }
+.diheir-collection__track { width: calc(var(--u) * 1128); gap: calc(var(--u) * 24); justify-content: center; }
+.diheir-collection__card {
+  position: relative; width: calc(var(--u) * 360); aspect-ratio: 1 / 1; overflow: hidden; flex: none;
+  cursor: pointer;
+}
+.diheir-collection__card img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  pointer-events: none; user-select: none; -webkit-user-drag: none;
+}
+.diheir-collection__card::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.diheir-collection__card:hover::after {
+  opacity: 0.6;
+}
+.diheir-collection__name {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 2; margin: 0;
+  font-family: "DreamAvenue", serif;
+  font-size: max(12px, calc(var(--u) * 28));
+  font-weight: 400;
+  line-height: normal;
+  color: #fff;
+  white-space: nowrap;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.diheir-collection__card:hover .diheir-collection__name {
+  opacity: 1;
+  visibility: visible;
+}
+.diheir-collection__bar {
+  position: absolute; left: 50%; top: calc(var(--u) * 978); width: calc(var(--u) * 925); margin-left: calc(var(--u) * -467);
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 10;
+}
+.diheir-collection__bar .diheir-progress { width: calc(var(--u) * 720); }
+.diheir-collection__bar .diheir-progress__bar {
+  width: 25%;
+  transform: translateX(calc(var(--progress, 0) * 300%));
+  transition: transform 0.4s ease;
+}
+
+/* ---------- 03_Section_Difference ---------- */
+.diheir-diff { position: relative; height: calc(var(--u) * 1491); background: #2e2d23; overflow: hidden; }
+.diheir-diff__bg {
+  position: absolute; left: calc(50% + var(--u) * 4 - var(--u) * 1524); top: calc(var(--u) * -22);
+  width: calc(var(--u) * 3048); height: calc(var(--u) * 1524); mix-blend-mode: multiply;
+}
+.diheir-diff__bg img {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--u) * 1524); height: calc(var(--u) * 3048);
+  object-fit: cover; opacity: 0.6; transform: translate(-50%, -50%) rotate(-90deg);
+}
+.diheir-diff__grad {
+  position: absolute; left: calc(50% - var(--u) * 4 - var(--u) * 1524); top: calc(var(--u) * -22);
+  width: calc(var(--u) * 3048); height: calc(var(--u) * 1524);
+  background: linear-gradient(180deg, #2e2d23 0%, rgba(46, 45, 35, 0) 25%, rgba(32, 32, 24, 0) 75%, #202018 100%);
+}
+.diheir-diff__inner { position: absolute; inset: 0; }
+.diheir-diff__what { position: absolute; left: calc(50% - var(--u) * 880); top: calc(var(--u) * 163); font-size: calc(var(--u) * 230); }
+.diheir-diff__different { position: absolute; left: calc(50% - var(--u) * 7); top: calc(var(--u) * 1128); font-size: calc(var(--u) * 230); }
+.diheir-diff__num { line-height: 1.3; font-size: calc(var(--u) * 128); letter-spacing: calc(var(--u) * -2.56); color: rgba(189, 190, 167, 0.48); white-space: nowrap; }
+.diheir-diff__label { font-size: max(12px, calc(var(--u) * 32)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.64); white-space: nowrap; }
+.diheir-diff__stat { position: absolute; }
+.diheir-diff__stat--heritage { left: calc(50% - var(--u) * 835); top: calc(var(--u) * 357); }
+.diheir-diff__stat--heritage .diheir-diff__num { margin-left: 1px; }
+.diheir-diff__stat--heritage .diheir-diff__label { margin-top: calc(var(--u) * -35); color: rgba(189, 190, 167, 0.48); }
+.diheir-diff__stat--counsel { left: calc(50% + var(--u) * 506); top: calc(var(--u) * 954); }
+.diheir-diff__stat--counsel .diheir-diff__num { width: calc(var(--u) * 214); text-align: center; }
+.diheir-diff__stat--counsel .diheir-diff__label { margin-left: calc(var(--u) * 60); margin-top: calc(var(--u) * -25); color: rgba(255, 255, 255, 0.3); }
+.diheir-diff__box { position: absolute; left: 50%; top: calc(var(--u) * 320); width: calc(var(--u) * 925); margin-left: calc(var(--u) * -456); display: flex; flex-direction: column; align-items: center; }
+/* 피그마 img 레이어(1:495) */
+.diheir-diff__track {
+  display: block;
+  position: relative;
+  width: calc(var(--u) * 600);
+  aspect-ratio: 600 / 830;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+.diheir-diff__track:active,
+.diheir-diff__track.is-dragging {
+  cursor: grabbing;
+}
+.diheir-diff__slide {
+  position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: calc(var(--u) * 22);
+  padding: 0 calc(var(--u) * 20) calc(var(--u) * 60); text-align: center; color: #fff;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  will-change: transform;
+}
+.diheir-diff__slide.is-active {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translateX(0);
+}
+.diheir-diff__slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: -1; }
+.diheir-diff__slide::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%), rgba(0, 0, 0, 0.2);
+}
+.diheir-diff__slide p { position: relative; white-space: nowrap; line-height: 1.3; }
+.diheir-diff__slide-title { font-weight: 400; font-size: calc(var(--u) * 52); letter-spacing: calc(var(--u) * -1.04); }
+.diheir-diff__slide-text { font-weight: 200; font-size: max(12px, calc(var(--u) * 24)); letter-spacing: calc(var(--u) * -0.48); }
+.diheir-diff__arrows { position: absolute; left: -1px; top: calc(var(--u) * 395); width: 100%; display: flex; justify-content: space-between; z-index: 5; pointer-events: none; }
+.diheir-diff__arrows .diheir-arrow { pointer-events: auto; }
+.diheir-diff__stats, .diheir-diff__title { display: contents; }
+
+/* ---------- 04_Section_Secret_Benefits ---------- */
+.diheir-benefits__head, .diheir-benefits__title { display: contents; }
+.diheir-benefits { position: relative; height: calc(var(--u) * 1460); background: #202018; overflow: hidden; }
+.diheir-benefits__secret { position: absolute; left: calc(50% - var(--u) * 603); top: calc(var(--u) * 118); font-size: calc(var(--u) * 200); }
+.diheir-benefits__benefits { position: absolute; left: calc(50% - var(--u) * 27); top: calc(var(--u) * 224); font-size: calc(var(--u) * 200); }
+.diheir-benefits__sub {
+  position: absolute; left: 0; right: 0; top: calc(var(--u) * 353); text-align: center;
+  font-size: max(12px, calc(var(--u) * 32)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.64); color: #fff;
+}
+.diheir-benefits__list {
+  position: absolute; left: calc(50% - var(--u) * 823); top: calc(var(--u) * 467); width: calc(var(--u) * 1646);
+  gap: calc(var(--u) * 20);
+}
+.diheir-card {
+  position: relative; width: calc(var(--u) * 560); height: calc(var(--u) * 649); border-radius: calc(var(--u) * 20); overflow: hidden;
+  padding: calc(var(--u) * 60) calc(var(--u) * 135) calc(var(--u) * 200) calc(var(--u) * 134);
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center; color: #fff;
+}
+.diheir-card { isolation: isolate; }
+.diheir-card > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
+.diheir-card::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0.2) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.8) 100%),
+    rgba(0, 0, 0, 0.48);
+}
+.diheir-card__body, .diheir-card__head { position: relative; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 20); }
+.diheir-card__head { cursor: default; text-align: center; }
+.diheir-card__no, .diheir-card__title { display: block; }
+.diheir-card__no { font-size: calc(var(--u) * 44); line-height: 1.3; letter-spacing: calc(var(--u) * -0.88); color: rgba(255, 255, 255, 0.8); }
+.diheir-card__title { font-weight: 300; font-size: calc(var(--u) * 44); line-height: 1.3; letter-spacing: calc(var(--u) * -0.88); }
+.diheir-card__note { font-weight: 200; font-size: max(12px, calc(var(--u) * 20)); line-height: 1.5; letter-spacing: calc(var(--u) * -0.4); }
+.diheir-card__text { font-weight: 300; font-size: max(12px, calc(var(--u) * 26)); line-height: 1.5; letter-spacing: calc(var(--u) * -0.52); white-space: nowrap; }
+.diheir-benefits__notice {
+  position: absolute; left: 0; right: 0; top: calc(var(--u) * 1268); padding: calc(var(--u) * 10) calc(var(--u) * 40); text-align: center;
+  font-weight: 300; font-size: max(12px, calc(var(--u) * 24)); line-height: 1.4; letter-spacing: calc(var(--u) * -0.48); color: rgba(255, 255, 255, 0.6);
+  white-space: normal; word-break: keep-all; overflow-wrap: break-word;
+}
+.diheir-benefits__notice p { margin: 0; white-space: normal; word-break: keep-all; overflow-wrap: break-word; }
+
+/* ---------- 05_Section_Reservation ---------- */
+.diheir-resv { position: relative; overflow: hidden; padding: calc(var(--u) * 307) 0 calc(var(--u) * 171); background: #2e2d23; }
+.diheir-resv__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+.diheir-resv::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(0deg, #2e2d23 18.397%, rgba(46, 45, 35, 0) 58.513%, rgba(32, 32, 24, 0) 92.797%, #202018 99.338%);
+}
+.diheir-resv__content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.diheir-resv__box {
+  scroll-margin-top: 24px;
+  background: rgba(170, 166, 128, 0.2); border: 2px solid rgba(255, 255, 255, 0.12); border-radius: calc(var(--u) * 32);
+  -webkit-backdrop-filter: blur(calc(var(--u) * 20)); backdrop-filter: blur(calc(var(--u) * 20));
+  padding: calc(var(--u) * 55) calc(var(--u) * 58) calc(var(--u) * 60) calc(var(--u) * 57);
+}
+.diheir-resv__card {
+  background: #c3c0b0; border-radius: calc(var(--u) * 20); padding: calc(var(--u) * 80);
+  display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 80); color: #444429;
+}
+.diheir-form { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 80); }
+.diheir-form__foot { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.diheir-form__main { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 100); width: calc(var(--u) * 800); }
+.diheir-form__head { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 24); text-align: center; width: 100%; }
+.diheir-form__title { font-size: calc(var(--u) * 80); line-height: 1.3; color: #444429; }
+.diheir-form__sub { font-size: max(12px, calc(var(--u) * 24)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.48); color: rgba(68, 68, 41, 0.8); }
+.diheir-form__fields { width: 100%; display: flex; flex-direction: column; gap: calc(var(--u) * 48); }
+.diheir-form__list { display: flex; flex-direction: column; gap: calc(var(--u) * 44); }
+.diheir-field { display: flex; align-items: center; width: 100%; }
+.diheir-field__label { flex: none; width: calc(var(--u) * 160); font-weight: 500; font-size: max(12px, calc(var(--u) * 28)); line-height: 1.3; color: #444429; white-space: nowrap; }
+.diheir-field__ctrl { flex: 1 1 0; min-width: 0; display: flex; gap: calc(var(--u) * 6); }
+.diheir-input {
+  position: relative; flex: 1 1 0; min-width: 0; display: flex; align-items: flex-end;
+  border-bottom: 1px solid #000; padding-bottom: calc(var(--u) * 10);
+}
+.diheir-input--time { flex: none; width: calc(var(--u) * 220); }
+.diheir-input input, .diheir-input select {
+  width: 100%; min-width: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; outline: none;
+  -webkit-appearance: none; appearance: none;
+  font-family: "Noto Serif KR", serif; font-weight: 200; font-size: max(12px, calc(var(--u) * 20)); line-height: 1.3;
+  letter-spacing: -0.02em; color: #444429;
+}
+.diheir-input input::placeholder { color: rgba(68, 68, 41, 0.8); opacity: 1; }
+.diheir-input select:invalid, .diheir-input input[type="date"]:invalid { color: rgba(68, 68, 41, 0.8); }
+.diheir-input select { padding-right: calc(var(--u) * 30); cursor: pointer; }
+.diheir-input select option { color: #444429; }
+.diheir-input__icon {
+  position: absolute; right: 0; bottom: calc(var(--u) * 12);
+  width: calc(var(--u) * 17.32); height: calc(var(--u) * 15); transform: scaleY(-1); pointer-events: none;
+}
+.diheir-input:focus-within { border-bottom-color: #6c682e; }
+.diheir-field.is-error .diheir-input { border-bottom-color: #9b2c1f; }
+.diheir-field--date { position: relative; }
+.diheir-calendar-btn {
+  background: transparent; border: 0; padding: 0 4px; margin: 0;
+  cursor: pointer; color: #444429; display: inline-flex; align-items: center; justify-content: center;
+  transition: color 0.2s ease; flex: none;
+}
+.diheir-calendar-btn:hover { color: #C56220; }
+.diheir-calendar-pop {
+  position: absolute; top: calc(100% + 12px); left: calc(var(--u) * 160);
+  width: 320px; background: #ffffff; border: 1px solid rgba(68, 68, 41, 0.16);
+  border-radius: 12px; box-shadow: 0 16px 36px rgba(56, 54, 41, 0.16);
+  padding: 16px 16px 12px 16px; z-index: 150; box-sizing: border-box;
+}
+.diheir-cal__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.diheir-cal__title { font-family: "DreamAvenue", "Noto Serif KR", serif; font-size: 18px; font-weight: 500; color: #383629; letter-spacing: 0.05em; }
+.diheir-cal__nav {
+  background: transparent; border: 1px solid rgba(68, 68, 41, 0.18); border-radius: 6px;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #444429; transition: all 0.2s ease;
+}
+.diheir-cal__nav:hover:not(:disabled) { background: #383629; color: #ffffff; border-color: #383629; }
+.diheir-cal__nav:disabled { opacity: 0.25; cursor: not-allowed; }
+.diheir-cal__weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
+  margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(68, 68, 41, 0.1);
+}
+.diheir-cal__wd { font-family: "Noto Serif KR", serif; font-size: 13px; font-weight: 500; color: #767468; }
+.diheir-cal__wd--sun { color: #b93a2b; }
+.diheir-cal__wd--sat { color: #4363a0; }
+.diheir-cal__grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; column-gap: 2px; margin-bottom: 10px;
+}
+.diheir-cal__empty { display: block; height: 36px; }
+.diheir-cal__day {
+  width: 36px; height: 36px; margin: 0 auto; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 0; background: transparent; font-family: "Noto Serif KR", serif;
+  font-size: 14px; font-weight: 400; color: #383629; cursor: pointer; transition: all 0.15s ease; padding: 0;
+}
+.diheir-cal__day:hover:not(:disabled) { background: #f0eee6; color: #1a1914; }
+.diheir-cal__day.is-today { border: 1px solid #383629; font-weight: 600; }
+.diheir-cal__day.is-selected { background: #383629 !important; color: #ffffff !important; font-weight: 600; }
+.diheir-cal__day:disabled { color: #d1cfc7; cursor: not-allowed; pointer-events: none; opacity: 0.45; }
+.diheir-cal__foot {
+  display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(68, 68, 41, 0.1);
+}
+.diheir-cal__btn-quick {
+  background: transparent; border: 0; padding: 4px 8px; font-family: "Noto Serif KR", serif;
+  font-size: 12px; font-weight: 400; color: #767468; cursor: pointer; border-radius: 4px; transition: color 0.15s ease, background 0.15s ease;
+}
+.diheir-cal__btn-quick:hover { color: #383629; background: #f0eee6; }
+.diheir-error { color: #9b2c1f; font-size: max(12px, calc(var(--u) * 16)); line-height: 1.3; margin-top: calc(var(--u) * 6); }
+.diheir-field-wrap { display: flex; flex-direction: column; }
+.diheir-field-wrap .diheir-error { padding-left: calc(var(--u) * 160); }
+.diheir-privacy { display: flex; align-items: center; gap: calc(var(--u) * 16); font-size: max(12px, calc(var(--u) * 16)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.32); color: #444429; white-space: nowrap; }
+.diheir-privacy label { display: flex; align-items: center; gap: calc(var(--u) * 8); font-weight: 300; cursor: pointer; }
+.diheir-privacy input { margin: 0; width: max(14px, calc(var(--u) * 18)); height: max(14px, calc(var(--u) * 18)); accent-color: #383629; }
+.diheir-privacy__link { font-weight: 200; text-decoration: underline; }
+.diheir-form__btn {
+  background: #383629; color: #fff; border-radius: calc(var(--u) * 50);
+  width: calc(var(--u) * 340); height: calc(var(--u) * 100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--u) * 40); line-height: normal; white-space: nowrap;
+}
+.diheir-form__msg { font-size: max(12px, calc(var(--u) * 18)); line-height: 1.4; text-align: center; color: #444429; }
+.diheir-form__msg:empty { display: none; }
+.diheir-store { width: 100%; padding: calc(var(--u) * 60) calc(var(--u) * 40); display: flex; flex-direction: column; gap: calc(var(--u) * 24); }
+.diheir-store__name { font-size: calc(var(--u) * 40); line-height: 1.3; letter-spacing: calc(var(--u) * -0.8); color: rgba(255, 255, 255, 0.9); }
+.diheir-store__details {
+  display: flex; justify-content: space-between; white-space: nowrap;
+  font-weight: 200; font-size: max(12px, calc(var(--u) * 20)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.4); color: rgba(255, 255, 255, 0.6);
+}
+.diheir-dialog {
+  max-width: min(90vw, 540px); border: 0; border-radius: 14px; padding: 32px 28px;
+  font-family: "Noto Serif KR", serif; color: #444429; background: #ffffff;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22); box-sizing: border-box;
+}
+.diheir-dialog::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+.diheir-dialog__title {
+  margin: 0 0 18px; font-size: 20px; font-weight: 600; color: #383629;
+  border-bottom: 1px solid rgba(68, 68, 41, 0.15); padding-bottom: 12px;
+}
+.diheir-dialog__content { margin-bottom: 24px; }
+.diheir-dialog__sub {
+  margin: 0 0 12px; font-size: 16px; font-weight: 600; color: #383629;
+}
+.diheir-dialog__list {
+  margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px;
+}
+.diheir-dialog__list li {
+  position: relative; padding-left: 14px; font-size: 14px; line-height: 1.6; color: #55553e; word-break: keep-all;
+}
+.diheir-dialog__list li::before {
+  content: "-"; position: absolute; left: 0; top: 0; color: #383629; font-weight: 600;
+}
+.diheir-dialog__list li strong {
+  color: #383629; font-weight: 600;
+}
+.diheir-dialog__form { display: flex; justify-content: flex-end; }
+.diheir-dialog__close {
+  font: inherit; font-size: 14px; padding: 9px 24px; border-radius: 30px; border: 0;
+  background: #383629; color: #fff; cursor: pointer; transition: background 0.2s ease;
+}
+.diheir-dialog__close:hover { background: #C56220; }
+
+/* diheirspace */
+.diheir-space { margin-top: calc(var(--u) * 134); display: flex; flex-direction: column; align-items: center; width: calc(var(--u) * 1715); }
+.diheir-space__title {
+  margin-right: calc(var(--u) * 66); text-transform: capitalize; white-space: nowrap;
+  font-size: calc(var(--u) * 300); line-height: 1.3; letter-spacing: calc(var(--u) * -6); color: #9f9f8b; opacity: 0.14;
+}
+.diheir-space__imgs { width: 100%; margin-top: calc(var(--u) * -87); display: flex; gap: calc(var(--u) * 32); }
+.diheir-space__img { position: relative; flex: 1 1 0; min-width: 0; aspect-ratio: 550.33 / 448; overflow: hidden; background: #d9d9d9; }
+.diheir-space__img img { position: absolute; height: 100%; }
+.diheir-space__img::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.2); }
+.diheir-space__img--01 img { left: -13.42%; top: 0.05%; width: 135.15%; }
+.diheir-space__img--02 img { left: -14.49%; top: 0.08%; width: 156.85%; }
+.diheir-space__img--03 img { inset: 0; width: 100%; object-fit: cover; }
+
+/* ---------- 06_Section_brand ---------- */
+.diheir-brand { position: relative; overflow: hidden; background: #2e2d23; padding: calc(var(--u) * 60) calc(var(--u) * 100); display: flex; justify-content: center; }
+.diheir-brand__inner { position: relative; width: calc(var(--u) * 1706); }
+.diheir-brand__top {
+  position: relative; z-index: 1; width: calc(var(--u) * 1522); display: flex; flex-direction: column;
+  font-size: calc(var(--u) * 230); line-height: 1.3; letter-spacing: calc(var(--u) * -4.6); color: rgba(189, 190, 167, 0.3); white-space: nowrap;
+}
+.diheir-brand__top span:first-child { margin-bottom: calc(var(--u) * -80); }
+.diheir-brand__top span:last-child { text-align: right; }
+.diheir-brand .diheir-olive { width: calc(var(--u) * 651); height: calc(var(--u) * 621); left: calc(var(--u) * 1081); top: calc(var(--u) * -34); }
+.diheir-brand__bottom { position: relative; z-index: 1; display: flex; align-items: center; gap: calc(var(--u) * 48); }
+.diheir-brand__img { position: relative; flex: none; width: calc(var(--u) * 669); aspect-ratio: 669 / 779; overflow: hidden; background: #d9d9d9; }
+.diheir-brand__img img { position: absolute; left: -3.74%; top: -10.15%; width: 116.31%; height: 128.66%; }
+.diheir-brand__img::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%), rgba(0, 0, 0, 0.2);
+}
+.diheir-brand__txt { width: calc(var(--u) * 989); display: flex; flex-direction: column; gap: calc(var(--u) * 331); }
+.diheir-brand__txt-top { display: flex; flex-direction: column; gap: calc(var(--u) * 40); line-height: 1.3; }
+.diheir-brand__lead { white-space: nowrap; font-weight: 300; font-size: calc(var(--u) * 60); letter-spacing: calc(var(--u) * -1.2); color: #fff; }
+.diheir-brand__en { text-align: right; font-size: max(12px, calc(var(--u) * 24)); letter-spacing: calc(var(--u) * -0.48); color: rgba(255, 255, 255, 0.8); }
+.diheir-brand__txt-bottom {
+  width: calc(var(--u) * 530); display: flex; flex-direction: column; gap: calc(var(--u) * 24);
+  font-weight: 300; font-size: max(12px, calc(var(--u) * 26)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.52); color: rgba(255, 255, 255, 0.8);
+}
+.diheir-brand__mo-row { display: contents; }
+
+/* ---------- 07_Section_deheirVideo (영상 미제공 — 영역만 유지) ---------- */
+.diheir-video { position: relative; height: calc(var(--u) * 1080); overflow: hidden; }
+.diheir-video { background: #1f1e18; }
+.diheir-video::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(0deg, rgba(46, 45, 35, 0) 81%, #2e2d23 98%), rgba(0, 0, 0, 0.2);
+}
+/* 16:9 영상을 섹션(PC 1920×1080 / MO 768×1080) 크기에 맞춰 cover 처리 */
+.diheir-video iframe {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: max(100%, calc(var(--u) * 1920)); aspect-ratio: 16 / 9; border: 0; pointer-events: none;
+}
+.diheir-video iframe.diheir-mo-only { width: 100%; height: auto; aspect-ratio: 9 / 16; }
+
+/* ---------- 플로팅 배너 (diheir_floating) : 화면 하단 고정 → 푸터 진입 시 푸터 위에서 멈춤 ---------- */
+.diheir-floating { position: sticky; bottom: calc(var(--u) * 40); height: 0; z-index: 30; pointer-events: none; }
+/* PC: 시안 top 566 / 높이 418 → 1080 화면 기준 하단 96 */
+.diheir-floating { bottom: calc(var(--u) * 96); }
+.diheir-floating__pc {
+  /* 내부 크기 고정: 가장 작은 글자(bene-text--s, 12)가 12px 아래로 내려가지 않도록 시안 크기(1px) 유지 */
+  --u: 1px;
+  /* 위치는 페이지 배율 기준. 시안 오른쪽 끝 = 중앙 + 880 */
+  position: absolute; bottom: 0; right: calc(50% - min(1px, calc(100cqw / 1920)) * 880); pointer-events: auto;
+  display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 20);
+}
+.diheir-floating__bene, .diheir-floating__cta { width: calc(var(--u) * 180); border-radius: calc(var(--u) * 40) 0 calc(var(--u) * 40) calc(var(--u) * 40); overflow: hidden; position: relative; }
+.diheir-floating__bene { height: calc(var(--u) * 318); background: #171711; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: pointer; }
+/* 시안의 img 레이어 전체 opacity 0.8 / 슬라이드 위치는 JS가 translateX로 지정 */
+.diheir-floating__slide {
+  position: absolute; inset: 0; overflow: hidden; opacity: 0.8; transition: transform 0.5s ease;
+  padding: calc(var(--u) * 24) calc(var(--u) * 12); display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 12); text-align: center;
+  cursor: pointer;
+}
+.diheir-floating__slide::before {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, #171711 26.113%, rgba(23, 23, 17, 0) 44.846%);
+}
+.diheir-floating__bene-img { position: absolute; max-width: none; pointer-events: none; }
+.diheir-floating__slide > p { position: relative; z-index: 2; width: 100%; }
+.diheir-floating__bene-title { font-weight: 300; font-size: calc(var(--u) * 20); line-height: 1.3; letter-spacing: calc(var(--u) * -0.4); color: #fff; }
+.diheir-floating__bene-text { font-size: calc(var(--u) * 14); line-height: 1.3; letter-spacing: calc(var(--u) * -0.28); color: #a6a688; }
+.diheir-floating__bene-text--s { font-size: calc(var(--u) * 12); letter-spacing: calc(var(--u) * -0.24); }
+@media (prefers-reduced-motion: reduce) { .diheir-floating__slide, .diheir-floating__line span { transition: none; } }
+.diheir-floating__bar { position: absolute; z-index: 2; left: calc(var(--u) * 12); right: calc(var(--u) * 12); bottom: calc(var(--u) * 24); opacity: 0.8; display: flex; align-items: center; gap: calc(var(--u) * 12); }
+.diheir-floating__btn { flex: none; display: flex; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.diheir-floating__bar img { width: calc(var(--u) * 16); height: calc(var(--u) * 16); flex: none; }
+.diheir-floating__line { position: relative; flex: 1 1 0; height: 1px; background: rgba(255, 255, 255, 0.6); }
+.diheir-floating__line span {
+  position: absolute; top: 0; width: calc(var(--u) * 38); height: 1px; background: #191813;
+  left: calc((100% - var(--u) * 38) * var(--diheir-float-pos, 0)); transition: left 0.5s ease;
+}
+.diheir-floating__cta { display: block; height: calc(var(--u) * 80); background: rgba(23, 23, 17, 0.6); color: #fff; }
+.diheir-floating__cta img { position: absolute; left: calc(50% - var(--u) * 61); top: calc(50% + var(--u) * 1.5 - var(--u) * 15.5); width: calc(var(--u) * 100); height: calc(var(--u) * 31); }
+.diheir-floating__cta span { position: absolute; left: 71.67%; top: 56.25%; font-size: calc(var(--u) * 16); line-height: 1; letter-spacing: calc(var(--u) * -0.32); white-space: nowrap; }
+.diheir-floating__mo { position: absolute; bottom: 0; right: calc(var(--u) * 32); width: calc(var(--u) * 139); aspect-ratio: 139 / 122; pointer-events: auto; }
+.diheir-floating__mo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- 08_Section_footer ---------- */
+.diheir-footer {
+  background: #1f1e18;
+  height: auto;
+  min-height: calc(var(--u) * 440);
+  padding: calc(var(--u) * 140) calc(var(--u) * 123) calc(var(--u) * 80);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.diheir-footer__inner {
+  position: relative;
+  width: 100%;
+  max-width: calc(var(--u) * 1674);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(var(--u) * 40);
+}
+.diheir-footer__info {
+  font-weight: 300;
+  font-size: max(12px, calc(var(--u) * 20));
+  line-height: 1.6;
+  letter-spacing: calc(var(--u) * -0.4);
+  color: rgba(193, 196, 173, 0.6);
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  font-style: normal;
+}
+.diheir-footer__logo {
+  flex: none;
+  width: calc(var(--u) * 544);
+  aspect-ratio: 544 / 198;
+}
+.diheir-footer__logo img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* PC 혜택 아코디언 (benefits_box 5:535) */
+@media (min-width: 1024px) {
+  .diheir-benefits__list { display: flex; justify-content: center; gap: calc(var(--u) * 20); }
+  .diheir-card {
+    flex: none; width: calc(var(--u) * 307); height: calc(var(--u) * 769); border-radius: calc(var(--u) * 71.5);
+    padding: calc(var(--u) * 83) calc(var(--u) * 20) calc(var(--u) * 65); justify-content: flex-start;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: width 0.65s cubic-bezier(0.25, 1, 0.35, 1), background 0.5s ease, padding 0.65s cubic-bezier(0.25, 1, 0.35, 1);
+    will-change: width;
+  }
+  .diheir-card > img {
+    opacity: 0.4;
+    transition: opacity 0.65s ease;
+  }
+  .diheir-card::before {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0.2) 100%);
+    transition: opacity 0.65s ease;
+  }
+  .diheir-card::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0.2) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.8) 100%),
+      rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.65s ease;
+  }
+  .diheir-card__head {
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 129);
+    transition: gap 0.65s cubic-bezier(0.25, 1, 0.35, 1), width 0.65s ease;
+  }
+  .diheir-card:nth-child(4) .diheir-card__head { gap: calc(var(--u) * 108); }
+  .diheir-card:nth-child(4) { padding-top: calc(var(--u) * 76); }
+  /* box_03 (I5:535;106:284) 접힘 상태: pt 83 / px 55, 텍스트 영역 198 */
+  .diheir-card:nth-child(2):not(.is-active),
+  .diheir-card:nth-child(3):not(.is-active) { padding: calc(var(--u) * 83) calc(var(--u) * 55) 0; }
+  .diheir-card:nth-child(2):not(.is-active) .diheir-card__head,
+  .diheir-card:nth-child(3):not(.is-active) .diheir-card__head { width: calc(var(--u) * 198); }
+  .diheir-card__no { height: calc(var(--u) * 64); font-size: calc(var(--u) * 60); letter-spacing: calc(var(--u) * -1.2); }
+  .diheir-card__title {
+    font-weight: 200; font-size: max(12px, calc(var(--u) * 32)); letter-spacing: calc(var(--u) * -0.64);
+    transition: font-size 0.65s cubic-bezier(0.25, 1, 0.35, 1), letter-spacing 0.6s ease;
+  }
+  .diheir-card .diheir-card__body {
+    position: absolute !important;
+    top: auto !important;
+    left: calc(var(--u) * 20);
+    right: calc(var(--u) * 20);
+    bottom: calc(var(--u) * 65) !important;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(var(--u) * 16));
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.25, 1, 0.35, 1), visibility 0.3s;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .diheir-card.is-active {
+    width: calc(var(--u) * 664); background: none; justify-content: flex-start;
+    padding: calc(var(--u) * 83) calc(var(--u) * 20) calc(var(--u) * 65);
+    cursor: default;
+  }
+  .diheir-card.is-active > img { opacity: 1; }
+  .diheir-card.is-active::after { opacity: 1; }
+  .diheir-card.is-active .diheir-card__head { cursor: default; gap: calc(var(--u) * 20); width: auto; }
+  .diheir-card:nth-child(4).is-active .diheir-card__head { gap: calc(var(--u) * 20); }
+  .diheir-card:nth-child(4).is-active { padding-top: calc(var(--u) * 83); }
+  .diheir-card.is-active .diheir-card__title { font-size: calc(var(--u) * 50); letter-spacing: calc(var(--u) * -1); }
+  .diheir-card.is-active .diheir-card__body {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition: opacity 0.5s ease 0.18s, transform 0.55s cubic-bezier(0.25, 1, 0.35, 1) 0.18s, visibility 0.5s 0.18s;
+  }
+  .diheir-card.is-active .diheir-card__note,
+  .diheir-card.is-active .diheir-card__text { font-weight: 200; font-size: max(12px, calc(var(--u) * 24)); line-height: 1.3; letter-spacing: calc(var(--u) * -0.48); }
+}
+
+/* =========================================================
+   Mobile (두 번째 시안: 768 프레임 기준, 실제 화면 너비에 맞춰 유동)
+   ========================================================= */
+@media (max-width: 1023px) {
+  .diheir-wrap { --u: min(1px, calc(100cqw / 768)); }
+  .diheir-pc-only { display: none; }
+  .diheir-mo-only { display: block; }
+  .diheir-br-mo { display: inline; }
+  .diheir-pc-nowrap { white-space: normal; }
+
+  .diheir-bene { height: auto; padding: calc(var(--u) * 32) calc(var(--u) * 20) calc(var(--u) * 16); }
+  .diheir-bene__txt { font-size: max(12px, calc(var(--u) * 18)); letter-spacing: calc(var(--u) * -0.36); }
+  .diheir-nav { top: calc(var(--u) * 71); padding: calc(var(--u) * 24) calc(var(--u) * 32); }
+  .diheir-nav__menu { width: calc(var(--u) * 56); height: calc(var(--u) * 56); }
+  .diheir-nav__cta { width: auto; padding: calc(var(--u) * 18) calc(var(--u) * 30); font-size: max(13px, calc(var(--u) * 24)); font-weight: 500; }
+  .diheir-nav__highlight { padding: calc(var(--u) * 8) calc(var(--u) * 16); }
+  .diheir-nav__highlight p { font-size: max(12px, calc(var(--u) * 16)); }
+  .diheir-dropdown {
+    --drop-u: max(calc(12.5px / 24), min(1px, calc(100cqw / 768)));
+    top: calc(100% + calc(var(--u) * 12));
+  }
+
+  .diheir-intro { padding-top: calc(var(--u) * 480); }
+  .diheir-intro__arch {
+    min-height: calc(var(--u) * 979); padding: calc(var(--u) * 120) 0 0; border: 0;
+    background: linear-gradient(180deg, #909073 47.914%, #2e2d23 98.281%);
+  }
+  .diheir-intro__inner { width: 100%; gap: calc(var(--u) * 40); }
+  .diheir-intro__eternal { height: auto; margin-bottom: calc(var(--u) * -80); font-size: calc(var(--u) * 80); line-height: 0.9; letter-spacing: calc(var(--u) * -1.6); }
+  .diheir-intro__ring { height: calc(var(--u) * 543); margin-bottom: calc(var(--u) * -80); padding: 0; display: flex; align-items: center; justify-content: center; }
+  .diheir-intro__ring-frame { width: calc(var(--u) * 634); height: calc(var(--u) * 352); }
+  .diheir-intro__ring-frame img, .diheir-intro__ring-frame video, .diheir-intro__ring-frame iframe { left: 5.13%; top: 4.55%; width: 89.73%; height: 90.91%; }
+  .diheir-intro__quote { font-size: calc(var(--u) * 40); letter-spacing: calc(var(--u) * -0.8); }
+  .diheir-intro__desc { font-size: max(12px, calc(var(--u) * 21)); letter-spacing: calc(var(--u) * -0.42); }
+  .diheir-intro > .diheir-olive.diheir-pc-only { display: none; }
+  .diheir-intro__olive-mo {
+    width: calc(var(--u) * 529);
+    height: calc(var(--u) * 505);
+    left: calc(50% - var(--u) * 436);
+    top: calc(var(--u) * 102);
+    z-index: 1;
+  }
+
+  .diheir-hero { top: calc(var(--u) * 203); width: calc(var(--u) * 420); margin-left: calc(var(--u) * -210); }
+  .diheir-hero__c { font-size: calc(var(--u) * 100); letter-spacing: calc(var(--u) * -2); }
+  .diheir-hero__rest { font-size: calc(var(--u) * 80); letter-spacing: calc(var(--u) * -1.6); }
+  .diheir-hero__grace { font-size: max(12px, calc(var(--u) * 24)); letter-spacing: calc(var(--u) * -0.48); }
+  .diheir-hero .diheir-olive { display: none; }
+
+  .diheir-collection__master { left: calc(50% - var(--u) * 349); top: calc(var(--u) * 63); font-size: calc(var(--u) * 90); }
+  .diheir-collection__art { right: calc(50% - var(--u) * 349); top: calc(var(--u) * 137); font-size: calc(var(--u) * 120); }
+  .diheir-collection__line { left: calc(50% + var(--u) * 149); top: calc(var(--u) * 107); width: calc(var(--u) * 200); height: calc(var(--u) * 2); }
+  .diheir-collection__title--mo {
+    position: absolute;
+    left: calc(50% - var(--u) * 349);
+    top: calc(var(--u) * 176);
+    font-size: max(14px, calc(var(--u) * 40));
+    line-height: normal;
+    color: #bdbea7;
+    margin: 0;
+    white-space: nowrap;
+    text-align: left;
+    z-index: 5;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .diheir-collection__title--mo.is-changing {
+    animation: diheirTitleFade 0.25s ease-out;
+  }
+  @keyframes diheirTitleFade {
+    0% { opacity: 0.35; transform: translateY(-3px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .diheir-collection__stage-mo {
+    position: absolute;
+    left: 0;
+    top: calc(var(--u) * 236);
+    width: 100%;
+    height: calc(var(--u) * 656);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    touch-action: pan-x pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+  }
+  .diheir-collection__stage-mo::-webkit-scrollbar {
+    display: none;
+  }
+  .diheir-collection__stage-mo.is-dragging {
+    cursor: grabbing;
+  }
+  .diheir-collection__track-mo {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0 calc(50% - var(--u) * 349);
+    gap: calc(var(--u) * 20);
+    width: max-content;
+    height: 100%;
+  }
+  .diheir-collection__track-mo .diheir-collection__card {
+    position: relative;
+    width: calc(var(--u) * 560);
+    aspect-ratio: 560 / 640;
+    overflow: hidden;
+    flex: none;
+  }
+  .diheir-collection__card { width: calc(var(--u) * 560); aspect-ratio: 560 / 640; }
+  .diheir-collection__card::after {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 75%, rgba(0, 0, 0, 0.60) 100%), linear-gradient(0deg, rgba(0, 0, 0, 0.20) 0%, rgba(0, 0, 0, 0.20) 100%);
+    opacity: 1;
+    transition: none;
+  }
+  .diheir-collection__card:hover::after { opacity: 1; }
+  .diheir-collection__name {
+    top: auto;
+    bottom: calc(var(--u) * 60);
+    left: calc(var(--u) * 20);
+    right: calc(var(--u) * 20);
+    transform: none;
+    margin: 0;
+    text-align: center;
+    font-size: max(12px, calc(var(--u) * 44));
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+  }
+  .diheir-collection__card:hover .diheir-collection__name {
+    opacity: 1;
+    visibility: visible;
+  }
+  .diheir-collection__bar { top: calc(var(--u) * 923); width: calc(var(--u) * 627); margin-left: calc(var(--u) * -307); justify-content: center; gap: calc(var(--u) * 32); z-index: 10; }
+  .diheir-collection__bar .diheir-progress { width: calc(var(--u) * 483); }
+  .diheir-collection__bar .diheir-progress__bar {
+    width: calc(100% / 9);
+    transform: translateX(calc(var(--mo-progress, 0) * 800%));
+    transition: transform 0.25s ease-out;
+  }
+
+  .diheir-diff { height: auto; padding: calc(var(--u) * 80) calc(var(--u) * 32); display: flex; justify-content: center; }
+  .diheir-diff__bg { left: 50%; top: 50%; width: calc(var(--u) * 762); height: calc(var(--u) * 1524); transform: translate(-50%, -50%); }
+  .diheir-diff__bg img { left: 0; top: 0; width: 100%; height: 100%; transform: none; }
+  .diheir-diff__grad { left: 50%; top: 50%; width: calc(var(--u) * 768); height: calc(var(--u) * 1226); transform: translate(-50%, -50%); }
+  .diheir-diff__inner { position: relative; inset: auto; width: calc(var(--u) * 560); display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 16); }
+  .diheir-diff__title { width: calc(var(--u) * 432); display: flex; flex-direction: column; font-size: calc(var(--u) * 80); }
+  .diheir-diff__what, .diheir-diff__different { position: static; font-size: inherit; }
+  .diheir-diff__what { margin-bottom: calc(var(--u) * -10); }
+  .diheir-diff__different { text-align: center; }
+  .diheir-diff__box { position: relative; left: auto; top: auto; width: 100%; margin: 0; }
+  .diheir-diff__track { width: 100%; aspect-ratio: 560 / 775; }
+  .diheir-diff__arrows { left: 50%; top: 50%; width: calc(var(--u) * 691); transform: translate(-50%, -50%); z-index: 2; pointer-events: none; }
+  .diheir-diff__arrows .diheir-arrow { pointer-events: auto; }
+  .diheir-diff__stats { display: flex; gap: calc(var(--u) * 60); align-items: flex-start; }
+  .diheir-diff__stat { position: static; display: grid; }
+  .diheir-diff__stat > * { grid-area: 1 / 1; }
+  .diheir-diff__num { font-size: calc(var(--u) * 60); letter-spacing: calc(var(--u) * -1.2); color: rgba(189, 190, 167, 0.6); }
+  .diheir-diff__label { font-size: max(12px, calc(var(--u) * 24)); letter-spacing: calc(var(--u) * -0.48); }
+  .diheir-diff__stat--heritage .diheir-diff__num { margin: 0 0 0 calc(var(--u) * 27); }
+  .diheir-diff__stat--heritage .diheir-diff__label { margin-top: calc(var(--u) * 72); color: rgba(189, 190, 167, 0.6); }
+  .diheir-diff__stat--counsel .diheir-diff__num { width: auto; margin-left: calc(var(--u) * 29); }
+  .diheir-diff__stat--counsel .diheir-diff__label { margin: calc(var(--u) * 78) 0 0; color: rgba(189, 190, 167, 0.6); }
+
+  .diheir-benefits { height: auto; padding: calc(var(--u) * 80) 0; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 40); }
+  .diheir-benefits__head { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 16); }
+  .diheir-benefits__title { width: calc(var(--u) * 339); display: flex; flex-direction: column; align-items: center; text-align: center; white-space: nowrap; font-size: calc(var(--u) * 100); }
+  .diheir-benefits__secret, .diheir-benefits__benefits { position: static; font-size: inherit; }
+  .diheir-benefits__secret { margin-bottom: calc(var(--u) * -16); text-align: center; }
+  .diheir-benefits__sub { position: static; font-size: max(12px, calc(var(--u) * 24)); letter-spacing: calc(var(--u) * -0.48); white-space: nowrap; }
+  .diheir-benefits__list { position: static; width: calc(var(--u) * 560); margin: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 20); overflow: visible; cursor: auto; }
+  .diheir-benefits__notice {
+    position: static; width: 100%; max-width: calc(var(--u) * 560); box-sizing: border-box;
+    padding: 0 calc(var(--u) * 32); margin: 0 auto;
+    font-weight: 200; font-size: max(12px, calc(var(--u) * 18)); line-height: 1.5; letter-spacing: calc(var(--u) * -0.36);
+    white-space: normal; word-break: keep-all; overflow-wrap: break-word; text-align: center;
+  }
+  .diheir-benefits__notice p { margin: 0; white-space: normal; word-break: keep-all; overflow-wrap: break-word; }
+
+  .diheir-resv { padding: calc(var(--u) * 100) calc(var(--u) * 32); }
+  .diheir-resv__content { width: calc(var(--u) * 704); margin: 0 auto; gap: calc(var(--u) * 80); }
+  .diheir-resv__box { width: 100%; padding: calc(var(--u) * 40) calc(var(--u) * 30); }
+  .diheir-resv__card { padding: calc(var(--u) * 60) calc(var(--u) * 40); gap: calc(var(--u) * 30); }
+  .diheir-form { width: 100%; gap: calc(var(--u) * 30); }
+  .diheir-form__main { width: 100%; gap: calc(var(--u) * 40); }
+  .diheir-form__head { gap: calc(var(--u) * 16); }
+  .diheir-form__title { font-size: calc(var(--u) * 48); }
+  .diheir-form__sub { font-size: max(12px, calc(var(--u) * 16)); letter-spacing: calc(var(--u) * -0.32); }
+  .diheir-form__list { gap: calc(var(--u) * 36); }
+  .diheir-field__label {
+    flex: none;
+    width: max(68px, calc(var(--u) * 120));
+    min-height: calc(var(--u) * 40);
+    display: flex;
+    align-items: center;
+    font-size: max(13px, calc(var(--u) * 20));
+    white-space: nowrap;
+  }
+  .diheir-input { padding-bottom: calc(var(--u) * 8); }
+  .diheir-input input, .diheir-input select {
+    font-size: max(10px, calc(var(--u) * 16));
+    letter-spacing: -0.02em;
+  }
+  .diheir-input__icon { bottom: calc(var(--u) * 10); }
+  .diheir-field-wrap .diheir-error { padding-left: max(68px, calc(var(--u) * 120)); font-size: max(12px, calc(var(--u) * 14)); }
+  .diheir-privacy { gap: calc(var(--u) * 8); font-size: max(12px, calc(var(--u) * 14)); letter-spacing: calc(var(--u) * -0.28); }
+  .diheir-calendar-pop {
+    left: 0; right: 0; margin: 0 auto;
+    width: 100%; max-width: 330px; min-width: 280px;
+    padding: 16px 14px 12px 14px;
+    top: calc(100% + 8px);
+  }
+  .diheir-cal__title { font-size: 17px; }
+  .diheir-cal__wd { font-size: 13px; }
+  .diheir-cal__day { font-size: 14px; width: 38px; height: 38px; }
+  .diheir-cal__btn-quick { font-size: 12px; padding: 6px 10px; }
+  .diheir-form__btn { width: auto; height: auto; padding: calc(var(--u) * 20) calc(var(--u) * 48); font-size: max(14px, calc(var(--u) * 32)); }
+  .diheir-form__msg { font-size: max(12px, calc(var(--u) * 14)); }
+  .diheir-store { padding: calc(var(--u) * 32) calc(var(--u) * 30); gap: calc(var(--u) * 8); }
+  .diheir-store__name { font-size: max(12px, calc(var(--u) * 32)); letter-spacing: calc(var(--u) * -0.64); }
+  .diheir-store__details { flex-direction: column; gap: calc(var(--u) * 12); font-size: max(12px, calc(var(--u) * 16)); letter-spacing: calc(var(--u) * -0.32); }
+
+  .diheir-space { margin-top: 0; width: auto; align-items: flex-start; }
+  .diheir-space__title { margin: 0 0 0 calc(var(--u) * 41); font-size: calc(var(--u) * 120); letter-spacing: calc(var(--u) * -2.4); }
+  .diheir-space__imgs { width: auto; margin-top: calc(var(--u) * -40); gap: calc(var(--u) * 12); }
+  .diheir-space__img { flex: none; width: calc(var(--u) * 210); aspect-ratio: 210 / 170.951; }
+
+  .diheir-brand { padding: calc(var(--u) * 80) calc(var(--u) * 32); }
+  .diheir-brand__inner { width: calc(var(--u) * 704); }
+  .diheir-brand__top { width: 100%; padding: 0 calc(var(--u) * 60); font-size: calc(var(--u) * 88); letter-spacing: calc(var(--u) * -1.76); }
+  .diheir-brand__top span:first-child { margin-bottom: calc(var(--u) * -30); }
+  .diheir-brand .diheir-olive { display: none; }
+  .diheir-brand__bottom { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: calc(var(--u) * 30); align-items: end; }
+  .diheir-brand__mo-row, .diheir-brand__txt { display: contents; }
+  .diheir-brand__txt-top { grid-column: 1 / -1; grid-row: 1; margin-bottom: calc(var(--u) * -30); position: relative; z-index: 1; }
+  .diheir-brand__img { grid-column: 1; grid-row: 2; }
+  .diheir-brand__lead { font-size: max(12px, calc(var(--u) * 32)); letter-spacing: calc(var(--u) * -0.64); }
+  .diheir-brand__en { font-size: max(12px, calc(var(--u) * 16)); letter-spacing: calc(var(--u) * -0.32); }
+  .diheir-brand__img { width: calc(var(--u) * 279); aspect-ratio: 279 / 327; transform: scaleX(-1); }
+  .diheir-brand__txt-bottom { grid-column: 2; grid-row: 2; width: auto; font-size: max(12px, calc(var(--u) * 16)); letter-spacing: calc(var(--u) * -0.32); }
+
+  .diheir-floating { bottom: calc(var(--u) * 40); }
+
+  .diheir-footer {
+    height: auto;
+    min-height: 0;
+    padding: calc(var(--u) * 80) calc(var(--u) * 32) calc(var(--u) * 60);
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  .diheir-footer__inner {
+    position: static;
+    top: auto;
+    left: auto;
+    margin: 0;
+    width: 100%;
+    max-width: calc(var(--u) * 704);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(var(--u) * 36);
+  }
+  .diheir-footer__info {
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 0;
+    font-size: max(12px, calc(var(--u) * 14));
+    letter-spacing: calc(var(--u) * -0.28);
+    line-height: 1.65;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  .diheir-footer__logo {
+    width: calc(var(--u) * 440);
+    max-width: 100%;
+    aspect-ratio: 544 / 198;
+  }
+  .diheir-footer__logo img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+}
+
+@media (max-width: 420px) {
+  .diheir-calendar-pop {
+    min-width: 0;
+    width: 100%;
+    max-width: 296px;
+    padding: 14px 8px 10px 8px;
+  }
+  .diheir-cal__grid {
+    column-gap: 1px;
+    row-gap: 2px;
+  }
+  .diheir-cal__day {
+    font-size: 12px;
+    width: 34px;
+    height: 34px;
+  }
+  .diheir-cal__empty {
+    height: 34px;
+  }
+}
+</style>
+</head>
+<body style="margin:0">
+
+<div class="diheir-wrap" id="diheir-landing">
+
+  <!-- diheir_bene_az (5:1371 PC / 5:1275 MO) : 화면 상단 고정 띠배너 -->
+  <!-- 변형 4종(5:1404 PC / 5:1420 MO)을 순서대로 전환 -->
+  <div class="diheir-bene" aria-live="off">
+    <p class="diheir-bene__txt is-active">상담 고객 혜택 벨벳 보석함 · 포레 베르테 룸 스프레이 증정</p>
+    <p class="diheir-bene__txt">웨딩밴드 계약 시 14K 골드 가드링 · 도로시 테디베어 키링 증정</p>
+    <p class="diheir-bene__txt">당일 계약 20% 할인 · 평일 방문 시 10% 추가 할인</p>
+    <p class="diheir-bene__txt">웨딩밴드 계약 시 디에르 제휴사 혜택 3종 중 택 1 증정</p>
+  </div>
+
+  <!-- nav -->
+  <header class="diheir-nav">
+    <div class="diheir-nav__menu-wrap">
+      <button type="button" class="diheir-nav__menu" aria-label="메뉴" aria-expanded="false" aria-controls="diheir-dropdown-menu">
+        <picture>
+          <source media="(max-width: 1023px)" srcset="component/img/icon/menu_mo.svg">
+          <img src="component/img/icon/menu_pc.svg" width="72" height="72" alt="">
+        </picture>
+      </button>
+      <nav class="diheir-dropdown" id="diheir-dropdown-menu" aria-label="주요 섹션 메뉴">
+        <ul class="diheir-dropdown__list">
+          <li class="diheir-dropdown__item"><a class="diheir-dropdown__link diheir-en" href="#custom">Custom</a></li>
+          <li class="diheir-dropdown__item"><a class="diheir-dropdown__link diheir-en" href="#collection">Collection</a></li>
+          <li class="diheir-dropdown__item"><a class="diheir-dropdown__link diheir-en" href="#difference">Difference</a></li>
+          <li class="diheir-dropdown__item"><a class="diheir-dropdown__link diheir-en" href="#benefits">Benefits</a></li>
+          <li class="diheir-dropdown__item"><a class="diheir-dropdown__link diheir-en" href="#reservation">Reservation</a></li>
+          <li class="diheir-dropdown__item"><a class="diheir-dropdown__link diheir-en" href="#brand">Brand</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="diheir-nav__cta-wrap">
+      <a class="diheir-nav__cta" href="#reservation">디에르 예약 / 상담</a>
+      <a class="diheir-nav__highlight" href="#reservation" aria-label="지금 바로 시크릿 혜택 받기">
+        <p>지금 바로 시크릿 혜택 받기</p>
+      </a>
+    </div>
+  </header>
+
+  <main class="diheir-main">
+
+    <!-- 01_section_introNcustom -->
+    <section class="diheir-intro" id="custom" aria-labelledby="diheir-hero-title">
+      <!-- 올리브 장식 (PC): 아치 뒤 레이어 -->
+      <div class="diheir-olive diheir-pc-only" aria-hidden="true">
+        <img class="diheir-olive__g1" src="component/img/01_section_introNcustom/olive_Group_01_pc.svg" alt="">
+        <img class="diheir-olive__g2" src="component/img/01_section_introNcustom/olive_Group_02_pc.svg" alt="">
+        <img class="diheir-olive__g3" src="component/img/01_section_introNcustom/olive_Group_03_pc.svg" alt="">
+        <img class="diheir-olive__g4" src="component/img/01_section_introNcustom/olive_Group_04_pc.svg" alt="">
+        <img class="diheir-olive__g5" src="component/img/01_section_introNcustom/olive_Group_05_pc.svg" alt="">
+      </div>
+
+      <!-- 올리브 장식 (모바일): 아치 뒤 레이어 -->
+      <div class="diheir-olive diheir-intro__olive-mo diheir-mo-only" aria-hidden="true">
+        <img class="diheir-olive__g1" src="component/img/01_section_introNcustom/olive_Group_01_mo.svg" alt="">
+        <img class="diheir-olive__g2" src="component/img/01_section_introNcustom/olive_Group_02_mo.svg" alt="">
+        <img class="diheir-olive__g3" src="component/img/01_section_introNcustom/olive_Group_03_mo.svg" alt="">
+        <img class="diheir-olive__g4" src="component/img/01_section_introNcustom/olive_Group_04_mo.svg" alt="">
+        <img class="diheir-olive__g5" src="component/img/01_section_introNcustom/olive_Group_05_mo.svg" alt="">
+      </div>
+
+      <!-- 인트로 아치 (올리브 앞 레이어) -->
+      <div class="diheir-intro__arch">
+        <div class="diheir-intro__inner">
+          <div class="diheir-intro__head">
+            <p class="diheir-intro__eternal diheir-en">
+              <span class="diheir-pc-only">Eternal Promises</span>
+              <span class="diheir-mo-only">Eternal<br>Promises</span>
+            </p>
+            <div class="diheir-intro__ring">
+              <div class="diheir-intro__ring-frame">
+                <video src="component/img/01_section_introNcustom/25.11.17_디에르 제품_모션_1-2.mp4" autoplay loop muted playsinline aria-label="디에르 웨딩 링 제품 모션 영상"></video>
+              </div>
+            </div>
+            <p class="diheir-intro__quote">"영원의 약속,<br>빛나는 순간을 디자인합니다."</p>
+          </div>
+          <p class="diheir-intro__desc">
+            커스터마이징 형식으로 제작되는 '우리'만의 스타일.<br>
+            아름답게 피어난 꽃, 부드러운 곡선의 줄기,<br>
+            섬세한 잎과 결, 고귀한 자연의 아름다움을 담은<br class="diheir-br-mo"> 우아한 디자인을 선보입니다.
+          </p>
+        </div>
+      </div>
+
+      <div class="diheir-hero">
+        <h1 id="diheir-hero-title" class="diheir-hero__customized diheir-en">
+          <span class="diheir-hero__c">C</span><span class="diheir-hero__rest">ustomized</span>
+          <span class="diheir-sr">Diheir</span>
+        </h1>
+        <div class="diheir-logp" role="img" aria-label="Diheir">
+          <picture class="diheir-logp__v1"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_01_mo.svg"><img src="component/img/logo/logp_Vector_01_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v2"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_02_mo.svg"><img src="component/img/logo/logp_Vector_02_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v3"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_03_mo.svg"><img src="component/img/logo/logp_Vector_03_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v4"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_04_mo.svg"><img src="component/img/logo/logp_Vector_04_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v5"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_05_mo.svg"><img src="component/img/logo/logp_Vector_05_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v6"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_06_mo.svg"><img src="component/img/logo/logp_Vector_06_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v7"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_07_mo.svg"><img src="component/img/logo/logp_Vector_07_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v8"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_08_mo.svg"><img src="component/img/logo/logp_Vector_08_pc.svg" alt=""></picture>
+          <picture class="diheir-logp__v9"><source media="(max-width: 1023px)" srcset="component/img/logo/logp_Vector_09_mo.svg"><img src="component/img/logo/logp_Vector_09_pc.svg" alt=""></picture>
+        </div>
+        <p class="diheir-hero__grace diheir-en">Grace in Every Moment</p>
+      </div>
+    </section>
+
+    <!-- 02_section_collection -->
+    <section class="diheir-collection" id="collection" aria-label="Masterpiece Art 컬렉션">
+      <p class="diheir-collection__master diheir-deco diheir-en" aria-hidden="true">Masterpiece</p>
+      <div class="diheir-collection__line" aria-hidden="true"></div>
+      <p class="diheir-collection__art diheir-deco diheir-en" aria-hidden="true">Art</p>
+      <!-- 모바일 전용 컬렉션 타이틀 (가로 스크롤 X위치에 따라 실시간 연동) -->
+      <h2 class="diheir-collection__title diheir-collection__title--mo diheir-en diheir-mo-only" id="diheir-collection-title-mo" aria-live="polite">LOV Collection</h2>
+
+      <!-- PC 전용 스테이지 -->
+      <div class="diheir-collection__stage diheir-pc-only" data-diheir-collection-slider>
+        <!-- 01~03 LOV Collection -->
+        <div class="diheir-collection__body is-active" data-collection-index="0">
+          <h2 class="diheir-collection__title diheir-en">LOV Collection</h2>
+          <ul class="diheir-slider__track diheir-collection__track">
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/01.png" width="1122" height="1402" alt="LOV Collection 01" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/02.png" width="1122" height="1402" alt="LOV Collection 02" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/03.png" width="1122" height="1402" alt="LOV Collection 03" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          </ul>
+        </div>
+        <!-- 04~05 Heirbound Collection -->
+        <div class="diheir-collection__body" data-collection-index="1" aria-hidden="true">
+          <h2 class="diheir-collection__title diheir-en">Heirbound Collection</h2>
+          <ul class="diheir-slider__track diheir-collection__track">
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/04.png" width="1254" height="1254" alt="Heirbound Collection 04" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/05.png" width="1122" height="1402" alt="Heirbound Collection 05" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          </ul>
+        </div>
+        <!-- 06~07 CONCORE Collection -->
+        <div class="diheir-collection__body" data-collection-index="2" aria-hidden="true">
+          <h2 class="diheir-collection__title diheir-en">CONCORE Collection</h2>
+          <ul class="diheir-slider__track diheir-collection__track">
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/06.png" width="1122" height="1402" alt="CONCORE Collection 06" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/07.png" width="1122" height="1402" alt="CONCORE Collection 07" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          </ul>
+        </div>
+        <!-- 08~09 SPIRAL Collection -->
+        <div class="diheir-collection__body" data-collection-index="3" aria-hidden="true">
+          <h2 class="diheir-collection__title diheir-en">SPIRAL Collection</h2>
+          <ul class="diheir-slider__track diheir-collection__track">
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/08.png" width="1122" height="1402" alt="SPIRAL Collection 08" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+            <li class="diheir-collection__card"><img src="component/img/02_section_collection/09.png" width="1122" height="1402" alt="SPIRAL Collection 09" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 모바일 전용 무한 가로 슬라이더 스테이지 (01 ~ 09 연속 트랙) -->
+      <div class="diheir-collection__stage-mo diheir-mo-only" id="diheir-collection-mo-stage" aria-label="Masterpiece Art 컬렉션 슬라이더">
+        <ul class="diheir-collection__track-mo" id="diheir-collection-mo-track">
+          <li class="diheir-collection__card" data-col-card="0"><img src="component/img/02_section_collection/01.png" width="1122" height="1402" alt="LOV Collection 01" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="1"><img src="component/img/02_section_collection/02.png" width="1122" height="1402" alt="LOV Collection 02" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="2"><img src="component/img/02_section_collection/03.png" width="1122" height="1402" alt="LOV Collection 03" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="3"><img src="component/img/02_section_collection/04.png" width="1254" height="1254" alt="Heirbound Collection 04" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="4"><img src="component/img/02_section_collection/05.png" width="1122" height="1402" alt="Heirbound Collection 05" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="5"><img src="component/img/02_section_collection/06.png" width="1122" height="1402" alt="CONCORE Collection 06" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="6"><img src="component/img/02_section_collection/07.png" width="1122" height="1402" alt="CONCORE Collection 07" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="7"><img src="component/img/02_section_collection/08.png" width="1122" height="1402" alt="SPIRAL Collection 08" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="8"><img src="component/img/02_section_collection/09.png" width="1122" height="1402" alt="SPIRAL Collection 09" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+        </ul>
+      </div>
+      <div class="diheir-collection__bar" data-diheir-controls="collection">
+        <button type="button" class="diheir-arrow" data-dir="-1" aria-label="이전 컬렉션"><img src="component/img/icon/teenyicons_left-outline.svg" width="40" height="40" alt=""></button>
+        <div class="diheir-progress" aria-hidden="true"><span class="diheir-progress__bar"></span></div>
+        <button type="button" class="diheir-arrow" data-dir="1" aria-label="다음 컬렉션"><img src="component/img/icon/teenyicons_right-outline.svg" width="40" height="40" alt=""></button>
+      </div>
+    </section>
+
+    <!-- 03_Section_Difference -->
+    <section class="diheir-diff" id="difference" aria-label="What Makes Different">
+      <div class="diheir-diff__bg" aria-hidden="true"><img src="component/img/03_Section_Difference/bg.png" width="1000" height="2000" alt="" loading="lazy"></div>
+      <div class="diheir-diff__grad" aria-hidden="true"></div>
+      <div class="diheir-diff__inner">
+        <h2 class="diheir-diff__title diheir-deco diheir-en">
+          <span class="diheir-diff__what">What Makes</span>
+          <span class="diheir-diff__different">Different</span>
+        </h2>
+        <div class="diheir-diff__box" data-diheir-slider>
+          <div class="diheir-diff__track">
+            <div class="diheir-diff__slide is-active" data-diff-index="0">
+              <img src="component/img/03_Section_Difference/diff-1.png" width="1122" height="1402" alt="명장의 세공" loading="lazy">
+              <p class="diheir-diff__slide-title">명장의 세공</p>
+              <p class="diheir-diff__slide-text">주얼리 명장의 손을 거친<br>정교한 세공, 완벽한 합금 비율, 내구성 강화 기술로<br>오랜 시간 착용에도 최상의 편안함을 제공합니다.</p>
+            </div>
+            <div class="diheir-diff__slide" data-diff-index="1" aria-hidden="true">
+              <img src="component/img/03_Section_Difference/diff-2.png" width="1122" height="1402" alt="GIA · IGI 인증" loading="lazy">
+              <p class="diheir-diff__slide-title"><span class="diheir-en">GIA · IGI</span> 인증</p>
+              <p class="diheir-diff__slide-text">국제 감정서가 동봉된 다이아몬드만 사용합니다.<br>품질이 문서로 증명됩니다.</p>
+            </div>
+            <div class="diheir-diff__slide" data-diff-index="2" aria-hidden="true">
+              <img src="component/img/03_Section_Difference/diff-3.png" width="1684" height="2528" alt="디자인 · 커스터마이징" loading="lazy">
+              <p class="diheir-diff__slide-title">디자인 · 커스터마이징</p>
+              <p class="diheir-diff__slide-text">디에르 전문 주얼리 디자이너들의<br>예술적 디자인으로<br>단 하나뿐인 주얼리를 선보입니다.</p>
+            </div>
+            <div class="diheir-diff__slide" data-diff-index="3" aria-hidden="true">
+              <img src="component/img/03_Section_Difference/diff-4.jpg" width="1122" height="1402" alt="평생 A/S" loading="lazy">
+              <p class="diheir-diff__slide-title">평생 <span class="diheir-en">A/S</span></p>
+              <p class="diheir-diff__slide-text">무상 폴리싱 및 클리닝 서비스로<br>구매 후에도 고객님과의<br>소중한 인연을 이어갑니다.</p>
+            </div>
+          </div>
+          <div class="diheir-diff__arrows">
+            <button type="button" class="diheir-arrow" data-dir="-1" aria-label="이전 이미지"><img src="component/img/icon/teenyicons_left-outline.svg" width="40" height="40" alt=""></button>
+            <button type="button" class="diheir-arrow" data-dir="1" aria-label="다음 이미지"><img src="component/img/icon/teenyicons_right-outline.svg" width="40" height="40" alt=""></button>
+          </div>
+        </div>
+        <div class="diheir-diff__stats">
+          <div class="diheir-diff__stat diheir-diff__stat--heritage">
+            <p class="diheir-diff__num diheir-en">80+</p>
+            <p class="diheir-diff__label">년의 헤리티지</p>
+          </div>
+          <div class="diheir-diff__stat diheir-diff__stat--counsel">
+            <p class="diheir-diff__num diheir-en">3200</p>
+            <p class="diheir-diff__label">건의 누적 상담건수</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04_Section_Secret_Benefits -->
+    <section class="diheir-benefits" id="benefits" aria-labelledby="diheir-benefits-title">
+      <div class="diheir-benefits__head">
+        <h2 id="diheir-benefits-title" class="diheir-benefits__title diheir-deco diheir-en">
+          <span class="diheir-benefits__secret">Secret</span>
+          <span class="diheir-benefits__benefits">Benefits</span>
+        </h2>
+        <p class="diheir-benefits__sub">디에르만의 특별한 고객 혜택을 만나보세요.</p>
+      </div>
+      <!-- benefits_box: 피그마 5:535(PC) — 선택한 카드가 펼쳐지는 아코디언 / 5:1116(MO) — 4장 세로 나열 -->
+      <ul class="diheir-benefits__list">
+        <li class="diheir-card is-active">
+          <img src="component/img/04_Section_Secret_Benefits/Frame_92.jpg" width="1736" height="2320" alt="" loading="lazy">
+          <button type="button" class="diheir-card__head" aria-expanded="true" aria-controls="diheir-benefit-01"><span class="diheir-card__no diheir-en">01</span><span class="diheir-card__title">상담 고객</span></button>
+          <div class="diheir-card__body" id="diheir-benefit-01"><p class="diheir-card__text">디에르 벨벳 보석함 및<br>포레 베르테 룸 스프레이 증정</p></div>
+        </li>
+        <li class="diheir-card">
+          <img src="component/img/04_Section_Secret_Benefits/Frame_99.png" width="1122" height="1402" alt="" loading="lazy">
+          <button type="button" class="diheir-card__head" aria-expanded="false" aria-controls="diheir-benefit-02"><span class="diheir-card__no diheir-en">02</span><span class="diheir-card__title">계약 고객</span></button>
+          <div class="diheir-card__body" id="diheir-benefit-02"><p class="diheir-card__note">웨딩밴드 계약 시</p><p class="diheir-card__text">고급 14K 골드 가드링 및<br>도로시 테디베어 키링 증정</p></div>
+        </li>
+        <li class="diheir-card">
+          <img src="component/img/04_Section_Secret_Benefits/Frame_100.jpg" width="4000" height="3000" alt="" loading="lazy">
+          <button type="button" class="diheir-card__head" aria-expanded="false" aria-controls="diheir-benefit-03"><span class="diheir-card__no diheir-en">03</span><span class="diheir-card__title">당일 계약 고객</span></button>
+          <div class="diheir-card__body" id="diheir-benefit-03"><p class="diheir-card__text">20% 특별 할인 제공<br>평일 방문 계약 시 10% 추가 할인 제공</p></div>
+        </li>
+        <li class="diheir-card">
+          <img src="component/img/04_Section_Secret_Benefits/Frame_101.jpg" width="2244" height="2804" alt="" loading="lazy">
+          <button type="button" class="diheir-card__head" aria-expanded="false" aria-controls="diheir-benefit-04"><span class="diheir-card__no diheir-en">04</span><span class="diheir-card__title">디에르<br>제휴사 혜택</span></button>
+          <div class="diheir-card__body" id="diheir-benefit-04"><p class="diheir-card__note">웨딩밴드 계약 시 (택 1) 증정</p><p class="diheir-card__text">1. 쿠촐라테라짜 와인 또는 식사권 1매<br>2. 더록시 프리미엄 에스테틱 1회 관리권 1매<br>3. 이성민 한복 바우처 1매</p></div>
+        </li>
+      </ul>
+      <div class="diheir-benefits__notice">
+        <p>※ 지금 신청하시면 모든 혜택이 제공됩니다.</p>
+        <p>해당 시크릿 혜택은 사정에 따라 변경될 수 있으며, 조기 마감될 수 있습니다.</p>
+      </div>
+    </section>
+
+    <!-- 05_Section_Reservation -->
+    <section class="diheir-resv" aria-labelledby="diheir-resv-title">
+      <img class="diheir-resv__bg" src="component/img/05_Section_Reservation/05_Section_Reservation.jpg" width="2700" height="3960" alt="" loading="lazy">
+      <div class="diheir-resv__content">
+        <div class="diheir-resv__box" id="reservation">
+          <div class="diheir-resv__card">
+            <!-- =====================================================
+                 [메이크샵 연동 필요] 예약 폼
+                 - 기존 예약 처리 코드 미제공: action / method / hidden 값 / name 은 실제 연동 코드로 교체.
+                 - 현재는 브라우저 검증만 수행하며, 데이터를 어디에도 전송·저장하지 않는다.
+                 ===================================================== -->
+            <form class="diheir-form" id="diheir-reservation-form" novalidate>
+              <!-- 광고 유입 추적용 Hidden Fields (방문자 비노출, 관리자 데이터 전송용) -->
+              <input type="hidden" name="utm_source" id="diheir-utm-source" value="">
+              <input type="hidden" name="utm_medium" id="diheir-utm-medium" value="">
+              <input type="hidden" name="utm_campaign" id="diheir-utm-campaign" value="">
+              <input type="hidden" name="utm_term" id="diheir-utm-term" value="">
+              <input type="hidden" name="utm_content" id="diheir-utm-content" value="">
+              <input type="hidden" name="utm_id" id="diheir-utm-id" value="">
+              <div class="diheir-form__main">
+                <div class="diheir-form__head">
+                  <h2 id="diheir-resv-title" class="diheir-form__title diheir-en">Reserve Appointment</h2>
+                  <p class="diheir-form__sub">지금 신청하시면 모든 혜택이 제공됩니다.</p>
+                </div>
+                <div class="diheir-form__fields">
+                  <div class="diheir-form__list">
+                    <div class="diheir-field-wrap">
+                      <div class="diheir-field">
+                        <label class="diheir-field__label" for="diheir-name">이름</label>
+                        <div class="diheir-field__ctrl"><div class="diheir-input">
+                          <input id="diheir-name" name="name" type="text" autocomplete="name" placeholder="입력해주세요." required maxlength="30" aria-describedby="diheir-name-err">
+                        </div></div>
+                      </div>
+                      <p class="diheir-error" id="diheir-name-err" hidden></p>
+                    </div>
+                    <div class="diheir-field-wrap">
+                      <div class="diheir-field">
+                        <label class="diheir-field__label" for="diheir-phone">연락처</label>
+                        <div class="diheir-field__ctrl"><div class="diheir-input">
+                          <input id="diheir-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="입력해주세요." required maxlength="13" aria-describedby="diheir-phone-err">
+                        </div></div>
+                      </div>
+                      <p class="diheir-error" id="diheir-phone-err" hidden></p>
+                    </div>
+                    <div class="diheir-field-wrap">
+                      <div class="diheir-field diheir-field--date">
+                        <label class="diheir-field__label" for="diheir-date">방문일</label>
+                        <div class="diheir-field__ctrl">
+                          <div class="diheir-input diheir-input--date">
+                            <input id="diheir-date" name="visit_date" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off" required aria-describedby="diheir-visit-err">
+                            <button type="button" class="diheir-calendar-btn" id="diheir-calendar-toggle" aria-label="달력 선택" title="달력 선택">
+                              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                              </svg>
+                            </button>
+                          </div>
+                          <div class="diheir-input diheir-input--time">
+                            <label class="diheir-sr" for="diheir-time">방문 시간</label>
+                            <select id="diheir-time" name="visit_time" required aria-describedby="diheir-visit-err">
+                              <option value="" selected disabled>시간 선택</option>
+                            </select>
+                            <img class="diheir-input__icon" src="component/img/icon/dropdown_icon.svg" width="17" height="15" alt="">
+                          </div>
+                        </div>
+                        <!-- 달력 팝업 (데스크톱 및 모바일 반응형, 최소 폰트 12px 보장) -->
+                        <div class="diheir-calendar-pop" id="diheir-calendar-pop" hidden aria-hidden="true">
+                          <div class="diheir-cal__head">
+                            <button type="button" class="diheir-cal__nav diheir-cal__nav--prev" id="diheir-cal-prev" aria-label="이전 달">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <span class="diheir-cal__title diheir-en" id="diheir-cal-title"></span>
+                            <button type="button" class="diheir-cal__nav diheir-cal__nav--next" id="diheir-cal-next" aria-label="다음 달">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                          </div>
+                          <div class="diheir-cal__weekdays">
+                            <span class="diheir-cal__wd diheir-cal__wd--sun">일</span>
+                            <span class="diheir-cal__wd">월</span>
+                            <span class="diheir-cal__wd">화</span>
+                            <span class="diheir-cal__wd">수</span>
+                            <span class="diheir-cal__wd">목</span>
+                            <span class="diheir-cal__wd">금</span>
+                            <span class="diheir-cal__wd diheir-cal__wd--sat">토</span>
+                          </div>
+                          <div class="diheir-cal__grid" id="diheir-cal-grid"></div>
+                          <div class="diheir-cal__foot">
+                            <button type="button" class="diheir-cal__btn-quick" id="diheir-cal-today">오늘</button>
+                            <button type="button" class="diheir-cal__btn-quick" id="diheir-cal-close">닫기</button>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="diheir-error" id="diheir-visit-err" hidden></p>
+                    </div>
+                    <div class="diheir-field-wrap">
+                      <div class="diheir-field">
+                        <label class="diheir-field__label" for="diheir-interest">관심분야</label>
+                        <div class="diheir-field__ctrl"><div class="diheir-input">
+                          <select id="diheir-interest" name="interest" required aria-describedby="diheir-interest-err">
+                            <option value="" selected disabled>선택해주세요.</option>
+                            <option value="웨딩밴드">웨딩밴드</option>
+                            <option value="리셋팅">리셋팅</option>
+                            <option value="다이아몬드 및 유색보석">다이아몬드 및 유색보석</option>
+                            <option value="데일리주얼리">데일리주얼리</option>
+                          </select>
+                          <img class="diheir-input__icon" src="component/img/icon/dropdown_icon.svg" width="17" height="15" alt="">
+                        </div></div>
+                      </div>
+                      <p class="diheir-error" id="diheir-interest-err" hidden></p>
+                    </div>
+                  </div>
+                  <div class="diheir-field-wrap">
+                    <div class="diheir-privacy">
+                      <label><input type="checkbox" id="diheir-agree" name="privacy_agree" value="Y" required aria-describedby="diheir-agree-err"> 개인정보 처리방침에 동의</label>
+                      <button type="button" class="diheir-privacy__link" data-diheir-open="diheir-privacy-dialog">약관보기</button>
+                    </div>
+                    <p class="diheir-error" id="diheir-agree-err" hidden style="padding-left:0"></p>
+                  </div>
+                </div>
+              </div>
+              <div class="diheir-form__foot">
+                <button type="submit" class="diheir-form__btn diheir-en">Reservation</button>
+                <p class="diheir-form__msg" role="status" aria-live="polite"></p>
+              </div>
+            </form>
+          </div>
+          <div class="diheir-store">
+            <p class="diheir-store__name diheir-en">DIHEIR Cheongdam</p>
+            <address class="diheir-store__details" style="font-style:normal">
+              <p>서울시 강남구 도산대로59길 16,<br>B1층 (청담동, 테이블2025)</p>
+              <p>AM 10:30 - PM 07:30 / 월·명절 연휴 휴무<br>Tel. 0507-1339-2520</p>
+            </address>
+          </div>
+        </div>
+
+        <!-- diheirspace -->
+        <div class="diheir-space">
+          <p class="diheir-space__title diheir-en" aria-hidden="true">diheirspace</p>
+          <div class="diheir-space__imgs">
+            <figure class="diheir-space__img diheir-space__img--01"><img src="component/img/05_Section_Reservation/diheirspace01.jpg" width="4096" height="2730" alt="디에르 청담 쇼룸 외관" loading="lazy"></figure>
+            <figure class="diheir-space__img diheir-space__img--02"><img src="component/img/05_Section_Reservation/diheirspace02.jpg" width="2920" height="1677" alt="디에르 청담 쇼룸 입구" loading="lazy"></figure>
+            <figure class="diheir-space__img diheir-space__img--03"><img src="component/img/05_Section_Reservation/diheirspace03.jpg" width="4000" height="3000" alt="디에르 청담 쇼룸 내부" loading="lazy"></figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06_Section_brand -->
+    <section class="diheir-brand" id="brand" aria-label="Timeless Green Grove">
+      <div class="diheir-brand__inner">
+        <p class="diheir-brand__top diheir-en" aria-hidden="true"><span>Timeless</span><span>Green Grove</span></p>
+        <div class="diheir-olive" aria-hidden="true">
+          <img class="diheir-olive__g1" src="component/img/06_Section_brand/olive_Group_01.svg" alt="" loading="lazy">
+          <img class="diheir-olive__g2" src="component/img/06_Section_brand/olive_Group_02.svg" alt="" loading="lazy">
+          <img class="diheir-olive__g3" src="component/img/06_Section_brand/olive_Group_03.svg" alt="" loading="lazy">
+          <img class="diheir-olive__g4" src="component/img/06_Section_brand/olive_Group_04.svg" alt="" loading="lazy">
+          <img class="diheir-olive__g5" src="component/img/06_Section_brand/olive_Group_05.svg" alt="" loading="lazy">
+        </div>
+        <div class="diheir-brand__bottom">
+          <div class="diheir-brand__mo-row">
+            <figure class="diheir-brand__img"><img src="component/img/06_Section_brand/img.png" width="896" height="1155" alt="세월을 품은 올리브 나무" loading="lazy"></figure>
+            <div class="diheir-brand__txt">
+              <div class="diheir-brand__txt-top">
+                <p class="diheir-brand__lead">시간이 흘러도 변하지 않는 감정과 가치</p>
+                <p class="diheir-brand__en diheir-en">Jewelry becomes meaningful<br>When it carries memories that transcend time</p>
+              </div>
+              <div class="diheir-brand__txt-bottom">
+                <p class="diheir-pc-nowrap">수백 년의 생명력을 품는 올리브 나무처럼,<br>세대를 넘어 전해지는 아름다운 연결.</p>
+                <p>사랑하는 이에게 전하는 소중한 마음을 변함없이<br>빛나는 디에르에 담아보세요.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07_Section_deheirVideo : 영상 파일 미제공 → 영역만 유지.
+         제공 시: <video src="component/video/파일명.mp4" poster="component/img/07_Section_deheirVideo/poster.jpg" preload="none" muted playsinline controls></video> -->
+    <section class="diheir-video" aria-label="디에르 영상">
+      <!-- Vimeo 배경 영상 (사용자 제공 URL) — 자동재생·반복·음소거, 지연 로딩 -->
+      <iframe class="diheir-pc-only" src="https://player.vimeo.com/video/1209697886?background=1&amp;autoplay=1&amp;loop=1&amp;muted=1&amp;autopause=0&amp;dnt=1" title="디에르 브랜드 영상" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" tabindex="-1"></iframe>
+      <iframe class="diheir-mo-only" src="https://player.vimeo.com/video/1227638632?background=1&amp;autoplay=1&amp;loop=1&amp;muted=1&amp;autopause=0&amp;dnt=1" title="디에르 브랜드 영상 (모바일)" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" tabindex="-1"></iframe>
+    </section>
+
+    <!-- diheir_floating : 화면 하단 고정, 푸터 진입 시 푸터 위에서 멈춤 (position: sticky) -->
+    <div class="diheir-floating">
+      <!-- PC: diheir_floating (5:721) = 혜택 카드(DiheirFloatingBene) + diheir_floating_cta -->
+      <div class="diheir-floating__pc diheir-pc-only">
+        <!-- DiheirFloatingBene 변형 4종(5:1446) — 좌우 버튼·드래그로 가로 이동, 30초마다 다음 -->
+        <div class="diheir-floating__bene">
+          <div class="diheir-floating__slide">
+            <img class="diheir-floating__bene-img" src="component/img/04_Section_Secret_Benefits/Frame_92.jpg" width="1736" height="2320" alt="" loading="lazy" style="left:-2.65%;top:27.54%;width:105.2%;height:75.76%">
+            <p class="diheir-floating__bene-title">상담 고객</p>
+            <p class="diheir-floating__bene-text">벨벳 보석함 및<br>룸 스프레이 증정</p>
+          </div>
+          <div class="diheir-floating__slide" aria-hidden="true">
+            <img class="diheir-floating__bene-img" src="component/img/04_Section_Secret_Benefits/Frame_99.png" width="1122" height="1402" alt="" loading="lazy" style="left:-14.98%;top:17.4%;width:122.71%;height:82.63%">
+            <p class="diheir-floating__bene-title">계약 고객</p>
+            <p class="diheir-floating__bene-text">14K 골드 가드링 및<br>테디베어 키링 증정</p>
+          </div>
+          <div class="diheir-floating__slide" aria-hidden="true">
+            <img class="diheir-floating__bene-img" src="component/img/04_Section_Secret_Benefits/Frame_100.jpg" width="4000" height="3000" alt="" loading="lazy" style="left:-73.7%;top:14.28%;width:247.41%;height:100%">
+            <p class="diheir-floating__bene-title">당일 계약 고객</p>
+            <p class="diheir-floating__bene-text diheir-floating__bene-text--s">20% 특별 할인<br>평일 방문 계약 시<br>10% 추가 할인</p>
+          </div>
+          <div class="diheir-floating__slide" aria-hidden="true">
+            <img class="diheir-floating__bene-img" src="component/img/04_Section_Secret_Benefits/Frame_101.jpg" width="2244" height="2804" alt="" loading="lazy" style="left:-10.13%;top:24.45%;width:120.04%;height:84.91%">
+            <p class="diheir-floating__bene-title">디에르<br>제휴사 혜택</p>
+            <p class="diheir-floating__bene-text diheir-floating__bene-text--s">쿠촐라테라짜 와인·식사권 1매<br>더록시 에스테틱 관리권 1매<br>이성민 한복 바우처 1매</p>
+          </div>
+          <!-- 미니 화살표 바: 좌우 버튼 = 이전/다음 혜택, 진행선 = 현재 위치 -->
+          <div class="diheir-floating__bar">
+            <button type="button" class="diheir-floating__btn" data-dir="-1" aria-label="이전 혜택"><img src="component/img/icon/teenyicons_left-outline_16.svg" width="16" height="16" alt=""></button>
+            <span class="diheir-floating__line" aria-hidden="true"><span></span></span>
+            <button type="button" class="diheir-floating__btn" data-dir="1" aria-label="다음 혜택"><img src="component/img/icon/teenyicons_right-outline_16.svg" width="16" height="16" alt=""></button>
+          </div>
+        </div>
+        <a class="diheir-floating__cta" href="https://www.diheir.com/?utm_source=diheir_landing&utm_medium=referral&utm_campaign=brand_page" target="_blank" rel="noopener" aria-label="디에르 브랜드페이지 바로가기">
+          <img src="component/img/logo/logp.svg" width="100" height="31" alt="">
+          <span class="diheir-en">.com</span>
+        </a>
+      </div>
+      <!-- MO: diheir_floating 1 -->
+      <a class="diheir-floating__mo diheir-mo-only" href="https://www.diheir.com/?utm_source=diheir_landing&utm_medium=referral&utm_campaign=brand_page" target="_blank" rel="noopener" aria-label="디에르 브랜드페이지 바로가기"><img src="component/img/diheir_floating/diheir_floating_1.png" width="139" height="122" alt="디에르 브랜드페이지 바로가기"></a>
+    </div>
+  </main>
+
+  <!-- 08_Section_footer -->
+  <footer class="diheir-footer">
+    <div class="diheir-footer__inner">
+      <address class="diheir-footer__info">
+        법인명(상호) : 디에르(DIHEIR)<br>
+        대표자(성명) : 조윤경<br>
+        사업자등록번호 : 758-26-01812 [사업자정보확인]<br>
+        개인정보 보호책임자 : 조윤경<br>
+        주소 : 서울특별시 강남구 도산대로59길 16, 지하 1층 (청담동, 테이블2025)<br>
+        대표번호 : 0507-1339-2520<br>
+        <br>
+        © 2026 DIHEIR. ALL RIGHTS RESERVED.
+      </address>
+      <div class="diheir-footer__logo"><img src="component/img/logo/Diheir_Logo_og.png" width="1130" height="410" alt="Diheir" loading="lazy"></div>
+    </div>
+  </footer>
+
+  <dialog class="diheir-dialog" id="diheir-privacy-dialog" aria-labelledby="diheir-privacy-dialog-title">
+    <h3 class="diheir-dialog__title" id="diheir-privacy-dialog-title">개인정보 처리방침</h3>
+    <div class="diheir-dialog__content">
+      <h4 class="diheir-dialog__sub">개인정보 수집 · 이용</h4>
+      <ul class="diheir-dialog__list">
+        <li><strong>목적</strong> : 쇼핑몰에서 제공하는 게시판 이용, 일반 게시판에 게시글 등록, 불법, 광고 게시글 등록 방지</li>
+        <li><strong>항목</strong> : 이름, 비밀번호, 이메일, 작성내용, IP, 첨부(파일에 개인정보 포함 시에만 수집, 이용)</li>
+        <li><strong>보유기간</strong> : 게시글 삭제 시 까지</li>
+      </ul>
+    </div>
+    <form method="dialog" class="diheir-dialog__form">
+      <button type="submit" class="diheir-dialog__close">닫기</button>
+    </form>
+  </dialog>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var root = document.getElementById("diheir-landing");
+  if (!root) return;
+
+  /* ---------- Difference(03) 무한 슬라이더 ---------- */
+  var diffBox = root.querySelector(".diheir-diff__box");
+  if (diffBox) {
+    var diffTrack = diffBox.querySelector(".diheir-diff__track");
+    var diffSlides = Array.from(diffBox.querySelectorAll(".diheir-diff__slide"));
+    var diffPrev = diffBox.querySelector('.diheir-diff__arrows [data-dir="-1"]');
+    var diffNext = diffBox.querySelector('.diheir-diff__arrows [data-dir="1"]');
+    var diffIndex = 0;
+    var diffTotal = diffSlides.length;
+    var diffIsAnimating = false;
+
+    function goToDiff(targetIndex, dir) {
+      if (diffIsAnimating) return;
+      var newIndex = (targetIndex + diffTotal) % diffTotal;
+      if (newIndex === diffIndex) return;
+
+      diffIsAnimating = true;
+
+      var outgoing = diffSlides[diffIndex];
+      var incoming = diffSlides[newIndex];
+      var moveDir = dir !== undefined ? dir : (newIndex > diffIndex ? 1 : -1);
+
+      // 1. 초기 위치 설정 (incoming 슬라이드를 이동할 방향의 바깥에 배치)
+      incoming.style.transition = "none";
+      incoming.style.transform = "translateX(" + (moveDir * 100) + "%)";
+      incoming.style.visibility = "visible";
+      incoming.style.opacity = "1";
+      incoming.style.zIndex = "2";
+      outgoing.style.zIndex = "1";
+      incoming.offsetWidth; // 강제 리플로우
+
+      // 2. 애니메이션 실행
+      requestAnimationFrame(function () {
+        var duration = "0.45s cubic-bezier(0.25, 1, 0.5, 1)";
+        outgoing.style.transition = "transform " + duration;
+        incoming.style.transition = "transform " + duration;
+        outgoing.style.transform = "translateX(" + (-moveDir * 100) + "%)";
+        incoming.style.transform = "translateX(0%)";
+      });
+
+      // 3. 완료 후 정리
+      setTimeout(function () {
+        outgoing.classList.remove("is-active");
+        outgoing.setAttribute("aria-hidden", "true");
+        outgoing.style.transition = "";
+        outgoing.style.transform = "";
+        outgoing.style.visibility = "";
+        outgoing.style.opacity = "";
+        outgoing.style.zIndex = "";
+
+        incoming.classList.add("is-active");
+        incoming.removeAttribute("aria-hidden");
+        incoming.style.transition = "";
+        incoming.style.transform = "";
+        incoming.style.visibility = "";
+        incoming.style.opacity = "";
+        incoming.style.zIndex = "";
+
+        diffIndex = newIndex;
+        diffIsAnimating = false;
+      }, 460);
+    }
+
+    if (diffPrev) {
+      diffPrev.disabled = false;
+      diffPrev.addEventListener("click", function (e) {
+        e.preventDefault();
+        goToDiff(diffIndex - 1, -1);
+      });
+    }
+    if (diffNext) {
+      diffNext.disabled = false;
+      diffNext.addEventListener("click", function (e) {
+        e.preventDefault();
+        goToDiff(diffIndex + 1, 1);
+      });
+    }
+
+    // 마우스 드래그 / 터치 스와이프: 가로 40px 넘는 순간 바로 한 장씩 전환 (무한 루프)
+    if (diffTrack) {
+      var diffStartX = null;
+      var diffDragging = false;
+
+      diffTrack.addEventListener("pointerdown", function (e) {
+        if (e.button !== 0) return;
+        diffStartX = e.clientX;
+        diffDragging = true;
+        diffTrack.setPointerCapture(e.pointerId);
+      });
+
+      diffTrack.addEventListener("pointermove", function (e) {
+        if (diffStartX === null || !diffDragging) return;
+        var dx = e.clientX - diffStartX;
+        if (Math.abs(dx) < 40) return;
+        diffStartX = null;
+        diffDragging = false;
+        diffTrack.classList.remove("is-dragging");
+        if (dx < 0) goToDiff(diffIndex + 1, 1);
+        else goToDiff(diffIndex - 1, -1);
+      });
+
+      function endDiffDrag() {
+        diffStartX = null;
+        diffDragging = false;
+        diffTrack.classList.remove("is-dragging");
+      }
+      diffTrack.addEventListener("pointerup", endDiffDrag);
+      diffTrack.addEventListener("pointercancel", endDiffDrag);
+
+      // 이미지 기본 드래그 방지
+      diffTrack.querySelectorAll("img").forEach(function (img) {
+        img.addEventListener("dragstart", function (e) { e.preventDefault(); });
+      });
+    }
+  }
+
+  /* ---------- 컬렉션(02) 슬라이더: PC (4컬렉션 단위) & Mobile (9장 무한 스크롤 + X위치 연동 타이틀) ---------- */
+  var colSection = root.querySelector(".diheir-collection");
+  var colStagePC = root.querySelector("[data-diheir-collection-slider]");
+  var colStageMO = root.querySelector("#diheir-collection-mo-stage");
+  var colTrackMO = root.querySelector("#diheir-collection-mo-track");
+  var colTitleMO = root.querySelector("#diheir-collection-title-mo");
+  var colControls = colSection ? colSection.querySelector('[data-diheir-controls="collection"]') : null;
+  var colPrev = colControls ? colControls.querySelector('[data-dir="-1"]') : null;
+  var colNext = colControls ? colControls.querySelector('[data-dir="1"]') : null;
+  var colBar = colControls ? colControls.querySelector(".diheir-progress__bar") : null;
+
+  function isColMobile() {
+    return window.innerWidth <= 1023;
+  }
+
+  /* --- [1] PC 전용 슬라이더 로직 (4개 컬렉션 바디 단위) --- */
+  var colIndex = 0;
+  var colTotal = 0;
+  var colIsAnimating = false;
+  var renderCollectionPC = function () {};
+
+  if (colStagePC) {
+    var colBodies = Array.from(colStagePC.querySelectorAll(".diheir-collection__body"));
+    colTotal = colBodies.length;
+
+    function colOffset(i) {
+      var off = (i - colIndex + colTotal) % colTotal;
+      return off > colTotal / 2 ? off - colTotal : off;
+    }
+
+    renderCollectionPC = function (newIndex, isInitial) {
+      if (!isInitial && colIsAnimating) return;
+      var before = [];
+      colBodies.forEach(function (s, i) { before[i] = colOffset(i); });
+      colIndex = (newIndex + colTotal) % colTotal;
+      if (!isInitial) {
+        colIsAnimating = true;
+        setTimeout(function () { colIsAnimating = false; }, 500);
+      }
+
+      colBodies.forEach(function (body, i) {
+        var off = colOffset(i);
+        if (isInitial || Math.abs(off - before[i]) > 1) body.style.transition = "none";
+        body.style.transform = "translateX(" + (off * 100) + "%)";
+        body.offsetWidth;
+        body.style.transition = "";
+
+        if (off === 0) {
+          body.classList.add("is-active");
+          body.removeAttribute("aria-hidden");
+          var track = body.querySelector(".diheir-slider__track");
+          if (track) track.scrollLeft = 0;
+        } else {
+          body.classList.remove("is-active");
+          body.setAttribute("aria-hidden", "true");
+        }
+      });
+
+      if (colBar && !isColMobile()) {
+        var progress = colTotal > 1 ? colIndex / (colTotal - 1) : 0;
+        colBar.style.setProperty("--progress", progress);
+      }
+    };
+
+    // PC 마우스 드래그 / 스와이프
+    var colStartX = null;
+    var colDragging = false;
+    colStagePC.addEventListener("pointerdown", function (e) {
+      if (isColMobile()) return;
+      if (e.button !== 0) return;
+      colStartX = e.clientX;
+      colDragging = true;
+      colStagePC.setPointerCapture(e.pointerId);
+    });
+    colStagePC.addEventListener("pointermove", function (e) {
+      if (isColMobile() || colStartX === null || !colDragging) return;
+      var dx = e.clientX - colStartX;
+      if (Math.abs(dx) < 40) return;
+      colStartX = null;
+      colDragging = false;
+      colStagePC.classList.remove("is-dragging");
+      renderCollectionPC(colIndex + (dx < 0 ? 1 : -1));
+    });
+    function colDragEnd() {
+      colStartX = null;
+      colDragging = false;
+      colStagePC.classList.remove("is-dragging");
+    }
+    colStagePC.addEventListener("pointerup", colDragEnd);
+    colStagePC.addEventListener("pointercancel", colDragEnd);
+    colStagePC.addEventListener("dragstart", function (e) { e.preventDefault(); });
+
+    renderCollectionPC(0, true);
+  }
+
+  /* --- [2] Mobile 전용 슬라이더 로직 (9개 카드 무한 슬라이더 + X값 연동 컬렉션명) --- */
+  var slideMobile = function () {};
+
+  if (colStageMO && colTrackMO) {
+    var moCards = Array.from(colTrackMO.children);
+    var MO_COUNT = moCards.length; // 9
+    var CLONES_BEFORE = 2;
+    var CLONES_AFTER = 2;
+
+    // 무한 루프 버퍼 생성 (앞 2세트, 뒤 2세트 복제)
+    var fragBefore = document.createDocumentFragment();
+    for (var b = 0; b < CLONES_BEFORE; b++) {
+      moCards.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute("aria-hidden", "true");
+        fragBefore.appendChild(clone);
+      });
+    }
+    colTrackMO.insertBefore(fragBefore, moCards[0]);
+
+    var fragAfter = document.createDocumentFragment();
+    for (var a = 0; a < CLONES_AFTER; a++) {
+      moCards.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute("aria-hidden", "true");
+        fragAfter.appendChild(clone);
+      });
+    }
+    colTrackMO.appendChild(fragAfter);
+
+    var allCards = Array.from(colTrackMO.children);
+    var cardStep = 0;
+    var setWidth = 0;
+    var currentColName = "LOV Collection";
+    var isProgrammatic = false;
+    var resetTimer = null;
+
+    // 요구사항 이미지별 노출 컬렉션명:
+    // 01 ~ 03 : LOV Collection
+    // 04 ~ 05 : Heirbound Collection
+    // 06 ~ 07 : CONCORE Collection
+    // 08 ~ 09 : SPIRAL Collection
+    function getColName(idx) {
+      if (idx <= 2) return "LOV Collection";       // 0, 1, 2 (01~03)
+      if (idx <= 4) return "Heirbound Collection"; // 3, 4 (04~05)
+      if (idx <= 6) return "CONCORE Collection";   // 5, 6 (06~07)
+      return "SPIRAL Collection";                  // 7, 8 (08~09)
+    }
+
+    function measureLayoutMO() {
+      if (allCards.length < 2) return;
+      cardStep = allCards[1].offsetLeft - allCards[0].offsetLeft;
+      if (cardStep <= 0) {
+        cardStep = allCards[0].offsetWidth + 20;
+      }
+      setWidth = cardStep * MO_COUNT;
+    }
+
+    function initMobileScrollPos() {
+      measureLayoutMO();
+      if (setWidth > 0) {
+        colStageMO.scrollLeft = setWidth * CLONES_BEFORE;
+        updateMobileState(true);
+      }
+    }
+
+    function updateMobileState(isInitial) {
+      if (!cardStep || cardStep <= 0) measureLayoutMO();
+      if (!cardStep || cardStep <= 0) return;
+
+      var x = colStageMO.scrollLeft;
+      var relX = (x % setWidth + setWidth) % setWidth;
+      var activeIdx = Math.floor((relX + cardStep * 0.45) / cardStep) % MO_COUNT;
+      if (activeIdx < 0) activeIdx += MO_COUNT;
+
+      // X값에 맞춘 컬렉션명 실시간 연동
+      var name = getColName(activeIdx);
+      if (colTitleMO && (name !== currentColName || isInitial)) {
+        currentColName = name;
+        colTitleMO.textContent = name;
+        if (!isInitial) {
+          colTitleMO.classList.remove("is-changing");
+          void colTitleMO.offsetWidth;
+          colTitleMO.classList.add("is-changing");
+        }
+      }
+
+      // 모바일 프로그레스 바 연동
+      if (colBar && isColMobile()) {
+        var progress = MO_COUNT > 1 ? activeIdx / (MO_COUNT - 1) : 0;
+        colBar.style.setProperty("--mo-progress", progress);
+      }
+
+      // 무한 루프 버퍼 정상화 (스크롤 멈춘 후)
+      if (!isProgrammatic) {
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(checkWrapMO, 120);
+      }
+    }
+
+    function checkWrapMO() {
+      if (isProgrammatic || setWidth <= 0) return;
+      var x = colStageMO.scrollLeft;
+      var baseStart = setWidth * CLONES_BEFORE;
+      var diff = x - baseStart;
+      if (Math.abs(diff) >= setWidth) {
+        var offsetSets = Math.round(diff / setWidth);
+        colStageMO.scrollLeft -= offsetSets * setWidth;
+      }
+    }
+
+    var ticking = false;
+    colStageMO.addEventListener("scroll", function () {
+      if (!ticking) {
+        requestAnimationFrame(function () {
+          updateMobileState(false);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    slideMobile = function (dir) {
+      if (!cardStep || cardStep <= 0) measureLayoutMO();
+      if (!cardStep || cardStep <= 0) return;
+
+      var x = colStageMO.scrollLeft;
+      var currentStepIndex = Math.round(x / cardStep);
+      var targetX = (currentStepIndex + dir) * cardStep;
+
+      isProgrammatic = true;
+      clearTimeout(resetTimer);
+
+      colStageMO.scrollTo({
+        left: targetX,
+        behavior: "smooth"
+      });
+
+      setTimeout(function () {
+        isProgrammatic = false;
+        checkWrapMO();
+      }, 420);
+    };
+
+    // 포인터 드래그 (데스크톱 마우스로 모바일 뷰 테스트 지원)
+    var isMoDragging = false;
+    var moStartX = 0;
+    var moStartScroll = 0;
+
+    colStageMO.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      isMoDragging = true;
+      moStartX = e.clientX;
+      moStartScroll = colStageMO.scrollLeft;
+      colStageMO.classList.add("is-dragging");
+      colStageMO.setPointerCapture(e.pointerId);
+    });
+
+    colStageMO.addEventListener("pointermove", function (e) {
+      if (!isMoDragging) return;
+      var dx = e.clientX - moStartX;
+      colStageMO.scrollLeft = moStartScroll - dx;
+    });
+
+    function endMoDrag() {
+      if (!isMoDragging) return;
+      isMoDragging = false;
+      colStageMO.classList.remove("is-dragging");
+    }
+
+    colStageMO.addEventListener("pointerup", endMoDrag);
+    colStageMO.addEventListener("pointercancel", endMoDrag);
+
+    // 모바일 초기화
+    setTimeout(initMobileScrollPos, 50);
+    window.addEventListener("load", function () {
+      if (isColMobile()) initMobileScrollPos();
+    });
+    window.addEventListener("resize", function () {
+      if (isColMobile()) {
+        measureLayoutMO();
+      }
+    });
+  }
+
+  /* --- [3] 컨트롤 버튼 (<, >) 연동 --- */
+  if (colPrev) {
+    colPrev.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (isColMobile()) {
+        slideMobile(-1);
+      } else {
+        renderCollectionPC(colIndex - 1);
+      }
+    });
+  }
+  if (colNext) {
+    colNext.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (isColMobile()) {
+        slideMobile(1);
+      } else {
+        renderCollectionPC(colIndex + 1);
+      }
+    });
+  }
+
+  /* ---------- 마우스 드래그 스크롤 (터치는 브라우저 기본 스와이프 사용 → 세로 스크롤 유지) ---------- */
+  root.querySelectorAll(".diheir-drag").forEach(function (el) {
+    var startX = 0, startLeft = 0, dragging = false;
+    el.addEventListener("pointerdown", function (e) {
+      if (e.pointerType !== "mouse" || el.scrollWidth <= el.clientWidth) return;
+      dragging = true; startX = e.clientX; startLeft = el.scrollLeft;
+      el.classList.add("is-dragging");
+      el.setPointerCapture(e.pointerId);
+    });
+    el.addEventListener("pointermove", function (e) {
+      if (dragging) el.scrollLeft = startLeft - (e.clientX - startX);
+    });
+    function end() { dragging = false; el.classList.remove("is-dragging"); }
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+    el.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  });
+
+  /* ---------- 04 시크릿 혜택 카드 활성화 및 부드러운 스크롤 이동 함수 ---------- */
+  var benefitCards = root.querySelectorAll(".diheir-card");
+  var benefitHoverTimer = null;
+
+  function activateBenefitCard(card) {
+    benefitCards.forEach(function (c) {
+      var on = c === card;
+      c.classList.toggle("is-active", on);
+      var head = c.querySelector(".diheir-card__head");
+      if (head) head.setAttribute("aria-expanded", on ? "true" : "false");
+    });
+  }
+
+  function scrollToBenefit(index) {
+    if (index < 0 || index >= benefitCards.length) return;
+    var targetCard = benefitCards[index];
+    if (!targetCard) return;
+
+    // 해당 혜택 카드 즉시 활성화
+    activateBenefitCard(targetCard);
+
+    // 부드럽게 스크롤 이동 (상단 고정 네비 및 띠배너 높이 차감)
+    var benefitsSection = document.getElementById("benefits");
+    if (!benefitsSection) return;
+
+    var navEl = root.querySelector(".diheir-nav");
+    var beneEl = root.querySelector(".diheir-bene");
+    var headerOffset = (navEl ? navEl.offsetHeight : 0) + (beneEl ? beneEl.offsetHeight : 0);
+
+    var isMobile = window.innerWidth <= 1023;
+    var targetEl = isMobile ? targetCard : benefitsSection;
+    var rect = targetEl.getBoundingClientRect();
+    var targetY = window.pageYOffset + rect.top - (headerOffset + 24);
+
+    window.scrollTo({
+      top: Math.max(0, targetY),
+      behavior: "smooth"
+    });
+  }
+
+  /* ---------- 띠배너 문구 전환 (30초마다 · 페이드 0.5초) 및 클릭 시 해당 혜택으로 부드럽게 이동 ---------- */
+  var beneBar = root.querySelector(".diheir-bene");
+  var beneTxts = root.querySelectorAll(".diheir-bene__txt");
+  var beneIndex = 0;
+  setInterval(function () {
+    beneTxts[beneIndex].classList.remove("is-active");
+    beneIndex = (beneIndex + 1) % beneTxts.length;
+    beneTxts[beneIndex].classList.add("is-active");
+  }, 30000);
+
+  if (beneBar) {
+    beneBar.addEventListener("click", function (e) {
+      var clickedTxt = e.target.closest(".diheir-bene__txt");
+      var idx = beneIndex;
+      if (clickedTxt) {
+        var found = Array.prototype.indexOf.call(beneTxts, clickedTxt);
+        if (found > -1) idx = found;
+      }
+      scrollToBenefit(idx);
+    });
+  }
+
+  /* ---------- PC 플로팅 혜택 카드: 좌우 버튼 · 드래그/스와이프 · 30초마다 다음 및 클릭 시 혜택 이동 ---------- */
+  var floatBox = root.querySelector(".diheir-floating__bene");
+  var floatSlides = floatBox.querySelectorAll(".diheir-floating__slide");
+  var floatLine = floatBox.querySelector(".diheir-floating__line");
+  var floatCount = floatSlides.length;
+  var floatIndex = 0;
+  var floatTimer;
+
+  // 현재 슬라이드 기준 상대 위치(-1, 0, 1, 2 …). 끝↔처음도 이어지도록 순환 계산
+  function floatOffset(i) {
+    var off = (i - floatIndex + floatCount) % floatCount;
+    return off > floatCount / 2 ? off - floatCount : off;
+  }
+  function showFloat(index) {
+    var before = [];
+    floatSlides.forEach(function (s, i) { before[i] = floatOffset(i); });
+    floatIndex = (index + floatCount) % floatCount;
+    floatSlides.forEach(function (slide, i) {
+      var off = floatOffset(i);
+      // 반대편으로 순간 이동하는 슬라이드는 카드 위를 가로지르지 않도록 전환 없이 이동
+      if (Math.abs(off - before[i]) > 1) slide.style.transition = "none";
+      slide.style.transform = "translateX(" + off * 100 + "%)";
+      slide.offsetWidth; // 위 transition: none 즉시 반영
+      slide.style.transition = "";
+      if (off === 0) slide.removeAttribute("aria-hidden");
+      else slide.setAttribute("aria-hidden", "true");
+    });
+    if (floatLine) {
+      floatLine.style.setProperty("--diheir-float-pos", floatIndex / (floatCount - 1));
+    }
+    clearInterval(floatTimer);
+    floatTimer = setInterval(function () { showFloat(floatIndex + 1); }, 30000);
+  }
+  floatBox.querySelectorAll(".diheir-floating__btn").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      showFloat(floatIndex + Number(btn.dataset.dir));
+    });
+  });
+  // 드래그(마우스)·스와이프(터치): 카드는 따라오지 않고, 가로 40px 넘는 순간 바로 이전/다음으로 넘어감(1회 드래그 = 1장).
+  // 드래그 없이 클릭한 경우 해당 혜택 카드가 활성화된 상태로 스크롤 이동
+  var floatStartX = null;
+  var floatMoved = false;
+  floatBox.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0 || e.target.closest(".diheir-floating__btn")) return;
+    floatStartX = e.clientX;
+    floatMoved = false;
+    floatBox.setPointerCapture(e.pointerId);
+  });
+  floatBox.addEventListener("pointermove", function (e) {
+    if (floatStartX === null) return;
+    var dx = e.clientX - floatStartX;
+    if (Math.abs(dx) > 6) {
+      floatMoved = true;
+    }
+    if (Math.abs(dx) < 40) return;
+    floatStartX = null;
+    showFloat(floatIndex + (dx < 0 ? 1 : -1));
+  });
+  function floatDragEnd(e) {
+    if (floatStartX !== null && !floatMoved) {
+      if (!e.target.closest(".diheir-floating__btn")) {
+        scrollToBenefit(floatIndex);
+      }
+    }
+    floatStartX = null;
+    floatMoved = false;
+  }
+  floatBox.addEventListener("pointerup", floatDragEnd);
+  floatBox.addEventListener("pointercancel", function () {
+    floatStartX = null;
+    floatMoved = false;
+  });
+  showFloat(0);
+
+  /* ---------- 혜택 카드 호버 전환 (PC: 마우스 호버 시 부드럽게 카드 펼침 - 미세 지연으로 튀는 현상 방지) ---------- */
+  benefitCards.forEach(function (card) {
+    card.addEventListener("mouseenter", function () {
+      clearTimeout(benefitHoverTimer);
+      // 마우스가 빠르게 스쳐 지나갈 때 통통 튀지 않도록 약 90ms의 미세 지연(Hover Intent) 후 부드럽게 활성화
+      benefitHoverTimer = setTimeout(function () {
+        activateBenefitCard(card);
+      }, 90);
+    });
+
+    card.addEventListener("mouseleave", function () {
+      clearTimeout(benefitHoverTimer);
+    });
+
+    card.addEventListener("focusin", function () {
+      clearTimeout(benefitHoverTimer);
+      activateBenefitCard(card);
+    });
+
+    card.addEventListener("click", function () {
+      clearTimeout(benefitHoverTimer);
+      activateBenefitCard(card);
+    });
+  });
+
+  /* ---------- 메뉴 드롭다운 (토글, 외부 클릭 시 닫기, 링크 클릭 시 부드러운 스크롤 이동) ---------- */
+  var menuBtn = root.querySelector(".diheir-nav__menu");
+  var dropdown = root.querySelector(".diheir-dropdown");
+  if (menuBtn && dropdown) {
+    menuBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var isOpen = dropdown.classList.toggle("is-open");
+      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    // 드롭다운 메뉴 항목 클릭 시 해당 섹션으로 스크롤 후 메뉴 닫기
+    dropdown.querySelectorAll(".diheir-dropdown__link").forEach(function (link) {
+      link.addEventListener("click", function (e) {
+        var targetId = link.getAttribute("href");
+        if (targetId && targetId.startsWith("#")) {
+          var targetEl = root.querySelector(targetId);
+          if (targetEl) {
+            e.preventDefault();
+            dropdown.classList.remove("is-open");
+            menuBtn.setAttribute("aria-expanded", "false");
+            targetEl.scrollIntoView({ behavior: "smooth" });
+          }
+        }
+      });
+    });
+
+    // 외부 클릭 시 드롭다운 닫기
+    document.addEventListener("click", function (e) {
+      if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+        if (dropdown.classList.contains("is-open")) {
+          dropdown.classList.remove("is-open");
+          menuBtn.setAttribute("aria-expanded", "false");
+        }
+      }
+    });
+
+    // ESC 키 입력 시 드롭다운 닫기
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && dropdown.classList.contains("is-open")) {
+        dropdown.classList.remove("is-open");
+        menuBtn.setAttribute("aria-expanded", "false");
+        menuBtn.focus();
+      }
+    });
+  }
+
+  /* ---------- Nav CTA 및 Highlight 클릭 시 부드러운 스크롤 이동 ---------- */
+  root.querySelectorAll(".diheir-nav__cta, .diheir-nav__highlight").forEach(function (cta) {
+    cta.addEventListener("click", function (e) {
+      cta.blur();
+      var targetId = cta.getAttribute("href");
+      if (targetId && targetId.startsWith("#")) {
+        var targetEl = root.querySelector(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          targetEl.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    });
+  });
+
+  /* ---------- 약관보기 ---------- */
+  root.querySelectorAll("[data-diheir-open]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var dlg = document.getElementById(btn.getAttribute("data-diheir-open"));
+      if (dlg && dlg.showModal) dlg.showModal();
+    });
+  });
+
+  /* ---------- 광고 유입 UTM 파라미터 수집 및 세션 보존 ---------- */
+  var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id"];
+  var UTM_STORAGE_KEY = "diheir_utm_data";
+
+  function collectAndPersistUtm() {
+    var utmValues = {};
+    var hasUrlUtm = false;
+
+    // 1. 현재 URL에서 UTM 파라미터 파싱
+    try {
+      var searchParams = new URLSearchParams(window.location.search);
+      UTM_KEYS.forEach(function (key) {
+        var val = searchParams.get(key);
+        if (val !== null && val.trim() !== "") {
+          utmValues[key] = val.trim();
+          hasUrlUtm = true;
+        } else {
+          utmValues[key] = "";
+        }
+      });
+    } catch (e) {
+      var q = window.location.search.substring(1);
+      if (q) {
+        var pairs = q.split("&");
+        pairs.forEach(function (pair) {
+          var parts = pair.split("=");
+          var k = decodeURIComponent(parts[0] || "");
+          var v = decodeURIComponent(parts[1] || "");
+          if (UTM_KEYS.indexOf(k) > -1 && v.trim() !== "") {
+            utmValues[k] = v.trim();
+            hasUrlUtm = true;
+          }
+        });
+      }
+      UTM_KEYS.forEach(function (key) {
+        if (!utmValues[key]) utmValues[key] = "";
+      });
+    }
+
+    // 2. URL에 UTM이 존재하면 세션 스토리지에 즉시 저장/갱신
+    if (hasUrlUtm) {
+      try {
+        sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(utmValues));
+      } catch (err) {}
+    } else {
+      // 3. URL에 없으면 기존 세션에 저장된 값 복원 (스크롤, 페이지 내 이동, 새로고침 등 대비)
+      try {
+        var saved = sessionStorage.getItem(UTM_STORAGE_KEY);
+        if (saved) {
+          var parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === "object") {
+            UTM_KEYS.forEach(function (key) {
+              utmValues[key] = parsed[key] || "";
+            });
+          }
+        }
+      } catch (err) {}
+    }
+
+    // 4. 예약폼의 hidden inputs에 값 자동 주입
+    var formEl = document.getElementById("diheir-reservation-form");
+    if (formEl) {
+      UTM_KEYS.forEach(function (key) {
+        var input = formEl.querySelector('input[name="' + key + '"]');
+        if (input) {
+          input.value = utmValues[key] || "";
+        }
+      });
+    }
+
+    return utmValues;
+  }
+
+  // 페이지 진입 즉시 UTM 수집 및 폼에 주입
+  var currentUtm = collectAndPersistUtm();
+
+  /* ---------- 예약 폼 ---------- */
+  var form = document.getElementById("diheir-reservation-form");
+  var msg = form.querySelector(".diheir-form__msg");
+  var timeSelect = form.querySelector("#diheir-time");
+  var dateInput = form.querySelector("#diheir-date");
+
+  // 폼이 로드된 후 hidden input 값 재확인 및 주입
+  UTM_KEYS.forEach(function (key) {
+    var input = form.querySelector('input[name="' + key + '"]');
+    if (input) {
+      input.value = currentUtm[key] || "";
+    }
+  });
+
+  // 운영시간(AM 10:30 - PM 07:30) 기준 30분 단위 시간 옵션
+  for (var m = 10 * 60 + 30; m <= 19 * 60; m += 30) {
+    var hh = String(Math.floor(m / 60)).padStart(2, "0");
+    var mm = String(m % 60).padStart(2, "0");
+    timeSelect.add(new Option(hh + ":" + mm, hh + ":" + mm));
+  }
+  // 방문일(date) 직접 입력 및 달력 팝업 인터랙션
+  var now = new Date();
+  var todayYear = now.getFullYear();
+  var todayMonth = now.getMonth(); // 0~11
+  var todayDate = now.getDate();
+  var todayStr = todayYear + "-" + String(todayMonth + 1).padStart(2, "0") + "-" + String(todayDate).padStart(2, "0");
+  dateInput.min = todayStr;
+
+  var calPop = document.getElementById("diheir-calendar-pop");
+  var calToggle = document.getElementById("diheir-calendar-toggle");
+  var calTitle = document.getElementById("diheir-cal-title");
+  var calPrev = document.getElementById("diheir-cal-prev");
+  var calNext = document.getElementById("diheir-cal-next");
+  var calGrid = document.getElementById("diheir-cal-grid");
+  var calToday = document.getElementById("diheir-cal-today");
+  var calClose = document.getElementById("diheir-cal-close");
+  var dateFieldWrap = form.querySelector(".diheir-field--date");
+
+  var viewYear = todayYear;
+  var viewMonth = todayMonth;
+
+  function renderCalendar(year, month) {
+    viewYear = year;
+    viewMonth = month;
+    if (calTitle) {
+      calTitle.textContent = year + "." + String(month + 1).padStart(2, "0");
+    }
+
+    if (calPrev) {
+      calPrev.disabled = (year < todayYear || (year === todayYear && month <= todayMonth));
+    }
+
+    if (!calGrid) return;
+    calGrid.innerHTML = "";
+
+    var firstDay = new Date(year, month, 1).getDay(); // 0(일) ~ 6(토)
+    var totalDays = new Date(year, month + 1, 0).getDate();
+
+    for (var i = 0; i < firstDay; i++) {
+      var empty = document.createElement("span");
+      empty.className = "diheir-cal__empty";
+      calGrid.appendChild(empty);
+    }
+
+    var selectedVal = dateInput.value.trim();
+
+    for (var d = 1; d <= totalDays; d++) {
+      var dayBtn = document.createElement("button");
+      dayBtn.type = "button";
+      dayBtn.className = "diheir-cal__day";
+      dayBtn.textContent = d;
+
+      var dStr = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+      dayBtn.setAttribute("data-date", dStr);
+
+      if (dStr < todayStr) {
+        dayBtn.disabled = true;
+        dayBtn.classList.add("is-disabled");
+      }
+      if (dStr === todayStr) {
+        dayBtn.classList.add("is-today");
+      }
+      if (dStr === selectedVal) {
+        dayBtn.classList.add("is-selected");
+      }
+
+      dayBtn.addEventListener("click", function () {
+        var chosen = this.getAttribute("data-date");
+        dateInput.value = chosen;
+        hideCalendar();
+        clearDateError();
+      });
+
+      calGrid.appendChild(dayBtn);
+    }
+  }
+
+  function showCalendar() {
+    var val = dateInput.value.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+      var p = val.split("-");
+      var y = parseInt(p[0], 10);
+      var m = parseInt(p[1], 10) - 1;
+      if (!isNaN(y) && !isNaN(m)) {
+        viewYear = y;
+        viewMonth = m;
+      }
+    }
+    renderCalendar(viewYear, viewMonth);
+    if (calPop) {
+      calPop.hidden = false;
+      calPop.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  function hideCalendar() {
+    if (calPop) {
+      calPop.hidden = true;
+      calPop.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function clearDateError() {
+    var err = checkDate(dateInput.value);
+    var errEl = document.getElementById("diheir-visit-err");
+    var field = dateInput.closest(".diheir-field");
+    if (errEl) {
+      errEl.textContent = err;
+      errEl.hidden = !err;
+    }
+    if (field) field.classList.toggle("is-error", !!err);
+    dateInput.setAttribute("aria-invalid", err ? "true" : "false");
+  }
+
+  if (calToggle) {
+    calToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (calPop && !calPop.hidden) {
+        hideCalendar();
+      } else {
+        showCalendar();
+      }
+    });
+  }
+
+  dateInput.addEventListener("click", function (e) {
+    e.stopPropagation();
+    if (calPop && calPop.hidden) {
+      showCalendar();
+    }
+  });
+
+  if (calPrev) {
+    calPrev.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var prevM = viewMonth - 1;
+      var prevY = viewYear;
+      if (prevM < 0) {
+        prevM = 11;
+        prevY--;
+      }
+      renderCalendar(prevY, prevM);
+    });
+  }
+
+  if (calNext) {
+    calNext.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var nextM = viewMonth + 1;
+      var nextY = viewYear;
+      if (nextM > 11) {
+        nextM = 0;
+        nextY++;
+      }
+      renderCalendar(nextY, nextM);
+    });
+  }
+
+  if (calToday) {
+    calToday.addEventListener("click", function (e) {
+      e.stopPropagation();
+      dateInput.value = todayStr;
+      hideCalendar();
+      clearDateError();
+    });
+  }
+
+  if (calClose) {
+    calClose.addEventListener("click", function (e) {
+      e.stopPropagation();
+      hideCalendar();
+    });
+  }
+
+  if (calPop) {
+    calPop.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    if (calPop && !calPop.hidden && dateFieldWrap && !dateFieldWrap.contains(e.target)) {
+      hideCalendar();
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && calPop && !calPop.hidden) {
+      hideCalendar();
+      if (calToggle) calToggle.focus();
+    }
+  });
+
+  // 방문일 연도·월·일 직접 입력 시 자동 포맷팅 (YYYY-MM-DD)
+  var lastDateVal = "";
+  dateInput.addEventListener("input", function (e) {
+    var raw = dateInput.value;
+    if (e.inputType === "deleteContentBackward" && (raw.endsWith("-") || (lastDateVal.length === raw.length + 1 && lastDateVal.endsWith("-")))) {
+      dateInput.value = raw.replace(/-$/, "");
+      lastDateVal = dateInput.value;
+      return;
+    }
+    var d = raw.replace(/\D/g, "").slice(0, 8);
+    var formatted = d.length < 5 ? d : d.length < 7 ? d.slice(0, 4) + "-" + d.slice(4) : d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6);
+    dateInput.value = formatted;
+    lastDateVal = formatted;
+
+    if (formatted.length === 10) {
+      var p = formatted.split("-");
+      var y = parseInt(p[0], 10);
+      var m = parseInt(p[1], 10) - 1;
+      if (!isNaN(y) && !isNaN(m)) {
+        renderCalendar(y, m);
+      }
+    }
+  });
+
+  function checkDate(v) {
+    if (!v || !v.trim()) return "방문일을 입력해주세요.";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return "방문일을 YYYY-MM-DD 형식으로 입력해주세요.";
+    var parts = v.split("-");
+    var y = parseInt(parts[0], 10);
+    var m = parseInt(parts[1], 10) - 1;
+    var d = parseInt(parts[2], 10);
+    var dt = new Date(y, m, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m || dt.getDate() !== d) {
+      return "올바른 날짜를 입력해주세요.";
+    }
+    if (v < dateInput.min) {
+      return "오늘 이후 날짜를 선택해주세요.";
+    }
+    return "";
+  }
+
+  // 연락처 숫자만 입력 → 하이픈 자동 정리
+  var phone = form.querySelector("#diheir-phone");
+  phone.addEventListener("input", function () {
+    var d = phone.value.replace(/\D/g, "").slice(0, 11);
+    phone.value = d.length < 4 ? d : d.length < 8 ? d.slice(0, 3) + "-" + d.slice(3) : d.slice(0, 3) + "-" + d.slice(3, d.length - 4) + "-" + d.slice(-4);
+  });
+
+  var rules = [
+    { el: form.querySelector("#diheir-name"), err: "diheir-name-err", check: function (v) { return v.trim().length >= 2 ? "" : "이름을 2자 이상 입력해주세요."; } },
+    { el: phone, err: "diheir-phone-err", check: function (v) { return /^01[016789]-?\d{3,4}-?\d{4}$/.test(v) ? "" : "연락처를 정확히 입력해주세요. (예: 010-1234-5678)"; } },
+    { el: dateInput, err: "diheir-visit-err", check: checkDate },
+    { el: timeSelect, err: "diheir-visit-err", check: function (v) { return v ? "" : "방문 시간을 선택해주세요."; } },
+    { el: form.querySelector("#diheir-interest"), err: "diheir-interest-err", check: function (v) { return v ? "" : "관심분야를 선택해주세요."; } },
+    { el: form.querySelector("#diheir-agree"), err: "diheir-agree-err", check: function () { return form.querySelector("#diheir-agree").checked ? "" : "개인정보 처리방침에 동의해주세요."; } }
+  ];
+
+  function validate() {
+    var firstInvalid = null;
+    var shown = {};
+    rules.forEach(function (r) {
+      var text = r.check(r.el.value);
+      var errEl = document.getElementById(r.err);
+      var field = r.el.closest(".diheir-field");
+      r.el.setAttribute("aria-invalid", text ? "true" : "false");
+      if (shown[r.err]) return; // 같은 줄(방문일/시간)은 첫 오류만 표시
+      errEl.textContent = text;
+      errEl.hidden = !text;
+      if (field) field.classList.toggle("is-error", !!text);
+      if (text) { shown[r.err] = true; if (!firstInvalid) firstInvalid = r.el; }
+    });
+    if (firstInvalid) firstInvalid.focus();
+    return !firstInvalid;
+  }
+
+  /* =========================================================
+     [메이크샵 연동 위치]
+     기존 예약 처리 코드가 제공되면 이 함수 내부를 실제 저장 로직으로 교체한다.
+     (form action / 필드 name / hidden 값 / 처리 함수 재사용)
+     현재는 어떠한 외부 전송도 하지 않으며, 예약 완료로 안내하지 않는다.
+     FormData에 이름, 연락처, 방문일, 시간, 관심분야, 개인정보동의와 함께
+     광고 유입 파라미터(utm_source, utm_medium, utm_campaign, utm_term, utm_content, utm_id)가
+     모두 포함되어 전달된다.
+     ========================================================= */
+  function submitReservation(data) {
+    var formDataObj = {};
+    data.forEach(function (value, key) {
+      formDataObj[key] = value;
+    });
+
+    // 콘솔 및 테스트 검증용 전역 참조 객체 생성
+    window.__diheir_last_reservation__ = formDataObj;
+    console.log("[DIHEIR 예약 접수 데이터 전송 시도]", formDataObj);
+
+    msg.textContent = "온라인 예약 저장 기능은 아직 연동 전입니다. 예약은 전화(0507-1339-2520)로 문의해 주세요.";
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    msg.textContent = "";
+    if (!validate()) return;
+    submitReservation(new FormData(form));
+  });
+})();
+</script>
+</body>
+</html>
