@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DIHEIR | Customized Diheir - 예약 / 상담</title>
+<link rel="preload" as="image" href="component/img/02_section_collection/01.png">
+<link rel="preload" as="image" href="component/img/02_section_collection/02.png">
+<link rel="preload" as="image" href="component/img/02_section_collection/03.png">
 <style>
 /* =========================================================
    Fonts
@@ -950,6 +953,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
     touch-action: pan-x pan-y;
@@ -1367,15 +1371,15 @@
       <!-- 모바일 전용 무한 가로 슬라이더 스테이지 (01 ~ 09 연속 트랙) -->
       <div class="diheir-collection__stage-mo diheir-mo-only" id="diheir-collection-mo-stage" aria-label="Masterpiece Art 컬렉션 슬라이더">
         <ul class="diheir-collection__track-mo" id="diheir-collection-mo-track">
-          <li class="diheir-collection__card" data-col-card="0"><img src="component/img/02_section_collection/01.png" width="1122" height="1402" alt="LOV Collection 01" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="1"><img src="component/img/02_section_collection/02.png" width="1122" height="1402" alt="LOV Collection 02" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="2"><img src="component/img/02_section_collection/03.png" width="1122" height="1402" alt="LOV Collection 03" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="3"><img src="component/img/02_section_collection/04.png" width="1254" height="1254" alt="Heirbound Collection 04" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="4"><img src="component/img/02_section_collection/05.png" width="1122" height="1402" alt="Heirbound Collection 05" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="5"><img src="component/img/02_section_collection/06.png" width="1122" height="1402" alt="CONCORE Collection 06" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="6"><img src="component/img/02_section_collection/07.png" width="1122" height="1402" alt="CONCORE Collection 07" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="7"><img src="component/img/02_section_collection/08.png" width="1122" height="1402" alt="SPIRAL Collection 08" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
-          <li class="diheir-collection__card" data-col-card="8"><img src="component/img/02_section_collection/09.png" width="1122" height="1402" alt="SPIRAL Collection 09" loading="lazy"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="0"><img src="component/img/02_section_collection/01.png" width="1122" height="1402" alt="LOV Collection 01" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="1"><img src="component/img/02_section_collection/02.png" width="1122" height="1402" alt="LOV Collection 02" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="2"><img src="component/img/02_section_collection/03.png" width="1122" height="1402" alt="LOV Collection 03" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="3"><img src="component/img/02_section_collection/04.png" width="1254" height="1254" alt="Heirbound Collection 04" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="4"><img src="component/img/02_section_collection/05.png" width="1122" height="1402" alt="Heirbound Collection 05" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="5"><img src="component/img/02_section_collection/06.png" width="1122" height="1402" alt="CONCORE Collection 06" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="6"><img src="component/img/02_section_collection/07.png" width="1122" height="1402" alt="CONCORE Collection 07" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="7"><img src="component/img/02_section_collection/08.png" width="1122" height="1402" alt="SPIRAL Collection 08" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
+          <li class="diheir-collection__card" data-col-card="8"><img src="component/img/02_section_collection/09.png" width="1122" height="1402" alt="SPIRAL Collection 09" loading="eager" decoding="async"><p class="diheir-collection__name diheir-en">ProductName</p></li>
         </ul>
       </div>
       <div class="diheir-collection__bar" data-diheir-controls="collection">
@@ -1993,12 +1997,19 @@
   var slideMobile = function () {};
 
   if (colStageMO && colTrackMO) {
+    // 컬렉션 이미지 사전 로드 (모바일 스와이프 지연 및 렌더링 딜레이 방지)
+    ["01", "02", "03", "04", "05", "06", "07", "08", "09"].forEach(function (n) {
+      var im = new Image();
+      im.decoding = "async";
+      im.src = "component/img/02_section_collection/" + n + ".png";
+    });
+
     var moCards = Array.from(colTrackMO.children);
     var MO_COUNT = moCards.length; // 9
-    var CLONES_BEFORE = 2;
-    var CLONES_AFTER = 2;
+    var CLONES_BEFORE = 1;
+    var CLONES_AFTER = 1;
 
-    // 무한 루프 버퍼 생성 (앞 2세트, 뒤 2세트 복제)
+    // 무한 루프 버퍼 생성 (앞 1세트, 뒤 1세트 복제)
     var fragBefore = document.createDocumentFragment();
     for (var b = 0; b < CLONES_BEFORE; b++) {
       moCards.forEach(function (card) {
@@ -2133,18 +2144,18 @@
       }, 420);
     };
 
-    // 포인터 드래그 (데스크톱 마우스로 모바일 뷰 테스트 지원)
+    // 포인터 드래그 (데스크톱 마우스로 모바일 뷰 테스트할 때만 지원, 모바일 터치는 네이티브 가속 스크롤 유지)
     var isMoDragging = false;
     var moStartX = 0;
     var moStartScroll = 0;
 
     colStageMO.addEventListener("pointerdown", function (e) {
-      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
       isMoDragging = true;
       moStartX = e.clientX;
       moStartScroll = colStageMO.scrollLeft;
       colStageMO.classList.add("is-dragging");
-      colStageMO.setPointerCapture(e.pointerId);
+      try { colStageMO.setPointerCapture(e.pointerId); } catch (_) {}
     });
 
     colStageMO.addEventListener("pointermove", function (e) {
