@@ -1253,21 +1253,34 @@
             </p>
             <div class="diheir-intro__ring">
               <div class="diheir-intro__ring-frame">
-                <video id="diheirRingVideo" autoplay loop muted playsinline aria-label="디에르 웨딩 링 제품 모션 영상"></video>
+                <video id="diheirRingVideo" autoplay loop muted playsinline aria-label="디에르 웨딩 링 제품 모션 영상" style="display:none;"></video>
+                <img id="diheirRingGif" alt="디에르 웨딩 링 제품 모션" style="display:none;">
+                <noscript>
+                  <img src="component/img/01_section_introNcustom/25.11.17_디에르_제품_모션_1.gif" alt="디에르 웨딩 링 제품 모션">
+                </noscript>
                 <script>
                   (function () {
-                    var v = document.getElementById("diheirRingVideo");
-                    if (!v) return;
                     var ua = navigator.userAgent;
                     var isSafari = (/Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Android/i.test(ua)) ||
                                    (/iPad|iPhone|iPod/.test(ua)) ||
                                    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-                    var src = isSafari
-                      ? "component/img/01_section_introNcustom/25.11.17_디에르 제품_모션_1.mp4"
-                      : "component/img/01_section_introNcustom/25.11.17_디에르 제품_모션_1_1.webm";
-                    v.src = src;
-                    var p = v.play();
-                    if (p !== undefined) p.catch(function () {});
+                    var v = document.getElementById("diheirRingVideo");
+                    var g = document.getElementById("diheirRingGif");
+                    if (isSafari) {
+                      if (v) v.remove();
+                      if (g) {
+                        g.src = "component/img/01_section_introNcustom/25.11.17_디에르_제품_모션_1.gif";
+                        g.removeAttribute("style");
+                      }
+                    } else {
+                      if (g) g.remove();
+                      if (v) {
+                        v.src = "component/img/01_section_introNcustom/25.11.17_디에르 제품_모션_1_1.webm";
+                        v.removeAttribute("style");
+                        var p = v.play();
+                        if (p !== undefined) p.catch(function () {});
+                      }
+                    }
                   })();
                 </script>
               </div>
