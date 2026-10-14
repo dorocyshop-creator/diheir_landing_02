@@ -258,7 +258,7 @@
 .diheir-olive__g3 { left: 0%; top: 0%; width: 136.37%; height: 148.59%; }
 .diheir-olive__g4 { left: 34.46%; top: 80.07%; width: 30.57%; height: 18.19%; }
 .diheir-olive__g5 { left: 1.17%; top: 6.75%; width: 95.69%; height: 93.29%; }
-.diheir-intro .diheir-olive { width: calc(var(--u) * 984); height: calc(var(--u) * 941); left: calc(50% - var(--u) * 922); top: calc(var(--u) * 142); }
+.diheir-intro .diheir-olive.diheir-pc-only { width: calc(var(--u) * 984); height: calc(var(--u) * 941); left: calc(50% - var(--u) * 922); top: calc(var(--u) * 142); }
 
 /* 타이틀 + 로고 (Customized / logp / Grace in Every Moment) */
 .diheir-hero {
@@ -907,11 +907,12 @@
   .diheir-intro__quote { font-size: calc(var(--u) * 40); letter-spacing: calc(var(--u) * -0.8); }
   .diheir-intro__desc { font-size: max(12px, calc(var(--u) * 21)); letter-spacing: calc(var(--u) * -0.42); }
   .diheir-intro > .diheir-olive.diheir-pc-only { display: none; }
-  .diheir-intro__olive-mo {
+  .diheir-intro .diheir-olive.diheir-intro__olive-mo {
     width: calc(var(--u) * 529);
     height: calc(var(--u) * 505);
     left: calc(50% - var(--u) * 436);
     top: calc(var(--u) * 102);
+    overflow: visible;
     z-index: 1;
   }
 
