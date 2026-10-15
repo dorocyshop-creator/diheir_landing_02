@@ -966,6 +966,7 @@ html { scroll-behavior: smooth; }
     height: calc(var(--u) * 656);
     overflow-x: auto;
     overflow-y: hidden;
+    overflow-anchor: none;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
@@ -2057,12 +2058,10 @@ html { scroll-behavior: smooth; }
     }
     colTrackMO.appendChild(fragAfter);
 
-    var allCards = Array.from(colTrackMO.children);
     var cardStep = 0;
     var setWidth = 0;
     var currentColName = "LOV Collection";
     var isProgrammatic = false;
-    var resetTimer = null;
 
     // 요구사항 이미지별 노출 컬렉션명:
     // 01 ~ 03 : LOV Collection
@@ -2077,10 +2076,11 @@ html { scroll-behavior: smooth; }
     }
 
     function measureLayoutMO() {
-      if (allCards.length < 2) return;
-      cardStep = allCards[1].offsetLeft - allCards[0].offsetLeft;
+      var cards = colTrackMO.children;
+      if (cards.length < 2) return;
+      cardStep = cards[1].offsetLeft - cards[0].offsetLeft;
       if (cardStep <= 0) {
-        cardStep = allCards[0].offsetWidth + 20;
+        cardStep = cards[0].offsetWidth + 20;
       }
       setWidth = cardStep * MO_COUNT;
     }
@@ -2093,9 +2093,54 @@ html { scroll-behavior: smooth; }
       }
     }
 
+    // 앞버퍼 확장 (왼쪽 앞에 9장 생성 후 scrollLeft 보정)
+    function expandBeforeMO() {
+      var fragBefore = document.createDocumentFragment();
+      moCards.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute("aria-hidden", "true");
+        fragBefore.appendChild(clone);
+      });
+      colTrackMO.insertBefore(fragBefore, colTrackMO.firstChild);
+      colStageMO.scrollLeft += setWidth;
+    }
+
+    // 뒷버퍼 확장 (오른쪽 뒤에 9장 생성)
+    function expandAfterMO() {
+      var fragAfter = document.createDocumentFragment();
+      moCards.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute("aria-hidden", "true");
+        fragAfter.appendChild(clone);
+      });
+      colTrackMO.appendChild(fragAfter);
+    }
+
+    // 앞뒤 4장 이하로 남았을 때 9장씩 버퍼 확장 검사
+    function checkBufferMO() {
+      if (!cardStep || cardStep <= 0) measureLayoutMO();
+      if (!cardStep || cardStep <= 0 || setWidth <= 0) return;
+
+      var x = colStageMO.scrollLeft;
+
+      // [1] 앞버퍼: 왼쪽으로 스크롤하여 앞쪽에 4장 이하 남았을 때 9장 생성
+      var cardsLeft = x / cardStep;
+      if (cardsLeft <= 4) {
+        expandBeforeMO();
+        x = colStageMO.scrollLeft;
+      }
+
+      // [2] 뒷버퍼: 오른쪽으로 스크롤하여 뒷쪽에 4장 이하 남았을 때 9장 생성
+      var maxScroll = colStageMO.scrollWidth - colStageMO.clientWidth;
+      var cardsRight = (maxScroll - x) / cardStep;
+      if (cardsRight <= 4) {
+        expandAfterMO();
+      }
+    }
+
     function updateMobileState(isInitial) {
       if (!cardStep || cardStep <= 0) measureLayoutMO();
-      if (!cardStep || cardStep <= 0) return;
+      if (!cardStep || cardStep <= 0 || setWidth <= 0) return;
 
       var x = colStageMO.scrollLeft;
       var relX = (x % setWidth + setWidth) % setWidth;
@@ -2121,39 +2166,18 @@ html { scroll-behavior: smooth; }
         colBar.style.setProperty("--mo-progress", progress);
       }
 
-      // 무한 루프 버퍼 정상화 (터치 중이 아닐 때만 스크롤 완료 후 실행)
-      if (!isProgrammatic && !isTouchingMO) {
-        clearTimeout(resetTimer);
-        resetTimer = setTimeout(checkWrapMO, 300);
+      // 동적 버퍼 확장 확인 (앞뒤 4장 이하 남으면 9장 생성)
+      if (!isProgrammatic) {
+        checkBufferMO();
       }
     }
 
-    var isTouchingMO = false;
-    colStageMO.addEventListener("touchstart", function () {
-      isTouchingMO = true;
-      clearTimeout(resetTimer);
-    }, { passive: true });
     colStageMO.addEventListener("touchend", function () {
-      isTouchingMO = false;
-      clearTimeout(resetTimer);
-      resetTimer = setTimeout(checkWrapMO, 300);
+      checkBufferMO();
     }, { passive: true });
     colStageMO.addEventListener("touchcancel", function () {
-      isTouchingMO = false;
-      clearTimeout(resetTimer);
-      resetTimer = setTimeout(checkWrapMO, 300);
+      checkBufferMO();
     }, { passive: true });
-
-    function checkWrapMO() {
-      if (isProgrammatic || isTouchingMO || setWidth <= 0) return;
-      var x = colStageMO.scrollLeft;
-      var baseStart = setWidth * CLONES_BEFORE;
-      var diff = x - baseStart;
-      if (Math.abs(diff) >= setWidth) {
-        var offsetSets = Math.round(diff / setWidth);
-        colStageMO.scrollLeft -= offsetSets * setWidth;
-      }
-    }
 
     var ticking = false;
     colStageMO.addEventListener("scroll", function () {
@@ -2168,14 +2192,29 @@ html { scroll-behavior: smooth; }
 
     slideMobile = function (dir) {
       if (!cardStep || cardStep <= 0) measureLayoutMO();
-      if (!cardStep || cardStep <= 0) return;
+      if (!cardStep || cardStep <= 0 || setWidth <= 0) return;
 
       var x = colStageMO.scrollLeft;
+
+      // 화살표 클릭 시 이동 방향에 4장 이하 버퍼가 남았으면 미리 확장
+      if (dir < 0) {
+        var cardsLeft = x / cardStep;
+        if (cardsLeft <= 4) {
+          expandBeforeMO();
+          x = colStageMO.scrollLeft;
+        }
+      } else if (dir > 0) {
+        var maxScroll = colStageMO.scrollWidth - colStageMO.clientWidth;
+        var cardsRight = (maxScroll - x) / cardStep;
+        if (cardsRight <= 4) {
+          expandAfterMO();
+        }
+      }
+
       var currentStepIndex = Math.round(x / cardStep);
       var targetX = (currentStepIndex + dir) * cardStep;
 
       isProgrammatic = true;
-      clearTimeout(resetTimer);
 
       colStageMO.scrollTo({
         left: targetX,
@@ -2184,7 +2223,7 @@ html { scroll-behavior: smooth; }
 
       setTimeout(function () {
         isProgrammatic = false;
-        checkWrapMO();
+        checkBufferMO();
       }, 420);
     };
 
