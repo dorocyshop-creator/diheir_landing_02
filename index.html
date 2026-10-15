@@ -2427,18 +2427,10 @@ html { scroll-behavior: smooth; }
     });
   });
 
-  /* ---------- 메뉴 드롭다운 (토글, 외부 클릭 시 닫기, 링크 클릭 시 부드러운 스크롤 이동) ---------- */
-  var menuBtn = root.querySelector(".diheir-nav__menu");
-  var dropdown = root.querySelector(".diheir-dropdown");
-  if (menuBtn && dropdown) {
-    menuBtn.addEventListener("click", function (e) {
-      e.stopPropagation();
-      var isOpen = dropdown.classList.toggle("is-open");
-      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    });
-
-    function scrollToTarget(targetEl) {
-      if (!targetEl) return;
+  /* ---------- 고정 헤더 높이 보정 부드러운 스크롤 함수 ---------- */
+  function scrollToTarget(targetEl) {
+    if (!targetEl) return;
+    try {
       var beneEl = root.querySelector(".diheir-bene");
       var navEl = root.querySelector(".diheir-nav");
       var headerHeight = 0;
@@ -2450,14 +2442,29 @@ html { scroll-behavior: smooth; }
         top: Math.max(0, targetY),
         behavior: "smooth"
       });
+    } catch (err) {
+      if (targetEl.scrollIntoView) {
+        targetEl.scrollIntoView({ behavior: "smooth" });
+      }
     }
+  }
+
+  /* ---------- 메뉴 드롭다운 (토글, 외부 클릭 시 닫기, 링크 클릭 시 부드러운 스크롤 이동) ---------- */
+  var menuBtn = root.querySelector(".diheir-nav__menu");
+  var dropdown = root.querySelector(".diheir-dropdown");
+  if (menuBtn && dropdown) {
+    menuBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var isOpen = dropdown.classList.toggle("is-open");
+      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
 
     // 드롭다운 메뉴 항목 클릭 시 해당 섹션으로 스크롤 후 메뉴 닫기
     dropdown.querySelectorAll(".diheir-dropdown__link").forEach(function (link) {
       link.addEventListener("click", function (e) {
         var targetId = link.getAttribute("href");
         if (targetId && targetId.startsWith("#")) {
-          var targetEl = root.querySelector(targetId);
+          var targetEl = document.querySelector(targetId) || root.querySelector(targetId);
           if (targetEl) {
             e.preventDefault();
             dropdown.classList.remove("is-open");
@@ -2494,7 +2501,7 @@ html { scroll-behavior: smooth; }
       cta.blur();
       var targetId = cta.getAttribute("href");
       if (targetId && targetId.startsWith("#")) {
-        var targetEl = root.querySelector(targetId);
+        var targetEl = document.querySelector(targetId) || root.querySelector(targetId);
         if (targetEl) {
           e.preventDefault();
           scrollToTarget(targetEl);
