@@ -8,6 +8,8 @@
 <link rel="preload" as="image" href="component/img/02_section_collection/02.png">
 <link rel="preload" as="image" href="component/img/02_section_collection/03.png">
 <style>
+html { scroll-behavior: smooth; }
+
 /* =========================================================
    Fonts
    - DreamAvenue: component/font/DreamAvenue/font.woff2, font.woff
@@ -500,7 +502,7 @@
 }
 .diheir-resv__content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
 .diheir-resv__box {
-  scroll-margin-top: 24px;
+  scroll-margin-top: max(200px, calc(var(--u) * 240));
   background: rgba(170, 166, 128, 0.2); border: 2px solid rgba(255, 255, 255, 0.12); border-radius: calc(var(--u) * 32);
   -webkit-backdrop-filter: blur(calc(var(--u) * 20)); backdrop-filter: blur(calc(var(--u) * 20));
   padding: calc(var(--u) * 55) calc(var(--u) * 58) calc(var(--u) * 60) calc(var(--u) * 57);
@@ -569,6 +571,7 @@
 }
 .diheir-cal__wd { font-family: "Noto Serif KR", serif; font-size: 13px; font-weight: 500; color: #767468; }
 .diheir-cal__wd--sun { color: #b93a2b; }
+.diheir-cal__wd--mon { color: #b93a2b; font-weight: 600; }
 .diheir-cal__wd--sat { color: #4363a0; }
 .diheir-cal__grid {
   display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; column-gap: 2px; margin-bottom: 10px;
@@ -583,9 +586,11 @@
 .diheir-cal__day.is-today { border: 1px solid #383629; font-weight: 600; }
 .diheir-cal__day.is-selected { background: #383629 !important; color: #ffffff !important; font-weight: 600; }
 .diheir-cal__day:disabled { color: #d1cfc7; cursor: not-allowed; pointer-events: none; opacity: 0.45; }
+.diheir-cal__day.is-holiday { text-decoration: line-through; opacity: 0.35; }
 .diheir-cal__foot {
   display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(68, 68, 41, 0.1);
 }
+.diheir-cal__notice { font-size: 11px; color: #8e8c80; letter-spacing: -0.02em; white-space: nowrap; }
 .diheir-cal__btn-quick {
   background: transparent; border: 0; padding: 4px 8px; font-family: "Noto Serif KR", serif;
   font-size: 12px; font-weight: 400; color: #767468; cursor: pointer; border-radius: 4px; transition: color 0.15s ease, background 0.15s ease;
@@ -1065,7 +1070,7 @@
 
   .diheir-resv { padding: calc(var(--u) * 100) calc(var(--u) * 32); }
   .diheir-resv__content { width: calc(var(--u) * 704); margin: 0 auto; gap: calc(var(--u) * 80); }
-  .diheir-resv__box { width: 100%; padding: calc(var(--u) * 40) calc(var(--u) * 30); }
+  .diheir-resv__box { scroll-margin-top: max(140px, calc(var(--u) * 200)); width: 100%; padding: calc(var(--u) * 40) calc(var(--u) * 30); }
   .diheir-resv__card { padding: calc(var(--u) * 60) calc(var(--u) * 40); gap: calc(var(--u) * 30); }
   .diheir-form { width: 100%; gap: calc(var(--u) * 30); }
   .diheir-form__main { width: 100%; gap: calc(var(--u) * 40); }
@@ -1566,7 +1571,7 @@
                           </div>
                           <div class="diheir-cal__weekdays">
                             <span class="diheir-cal__wd diheir-cal__wd--sun">일</span>
-                            <span class="diheir-cal__wd">월</span>
+                            <span class="diheir-cal__wd diheir-cal__wd--mon" title="월요일 정기휴무">월</span>
                             <span class="diheir-cal__wd">화</span>
                             <span class="diheir-cal__wd">수</span>
                             <span class="diheir-cal__wd">목</span>
@@ -1576,6 +1581,7 @@
                           <div class="diheir-cal__grid" id="diheir-cal-grid"></div>
                           <div class="diheir-cal__foot">
                             <button type="button" class="diheir-cal__btn-quick" id="diheir-cal-today">오늘</button>
+                            <span class="diheir-cal__notice">월·명절 연휴 휴무</span>
                             <button type="button" class="diheir-cal__btn-quick" id="diheir-cal-close">닫기</button>
                           </div>
                         </div>
@@ -2431,6 +2437,21 @@
       menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     });
 
+    function scrollToTarget(targetEl) {
+      if (!targetEl) return;
+      var beneEl = root.querySelector(".diheir-bene");
+      var navEl = root.querySelector(".diheir-nav");
+      var headerHeight = 0;
+      if (beneEl) headerHeight += beneEl.getBoundingClientRect().height;
+      if (navEl) headerHeight += navEl.getBoundingClientRect().height;
+      var extraGap = 24;
+      var targetY = window.pageYOffset + targetEl.getBoundingClientRect().top - headerHeight - extraGap;
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior: "smooth"
+      });
+    }
+
     // 드롭다운 메뉴 항목 클릭 시 해당 섹션으로 스크롤 후 메뉴 닫기
     dropdown.querySelectorAll(".diheir-dropdown__link").forEach(function (link) {
       link.addEventListener("click", function (e) {
@@ -2441,7 +2462,7 @@
             e.preventDefault();
             dropdown.classList.remove("is-open");
             menuBtn.setAttribute("aria-expanded", "false");
-            targetEl.scrollIntoView({ behavior: "smooth" });
+            scrollToTarget(targetEl);
           }
         }
       });
@@ -2476,7 +2497,7 @@
         var targetEl = root.querySelector(targetId);
         if (targetEl) {
           e.preventDefault();
-          targetEl.scrollIntoView({ behavior: "smooth" });
+          scrollToTarget(targetEl);
         }
       }
     });
@@ -2604,6 +2625,54 @@
   var calClose = document.getElementById("diheir-cal-close");
   var dateFieldWrap = form.querySelector(".diheir-field--date");
 
+  // 휴무일 정의: 매주 월요일 정기휴무 + 명절 연휴(신정, 설날 연휴, 추석 연휴)
+  var HOLIDAYS = {
+    // 2025
+    "2025-01-01": "신정",
+    "2025-01-27": "설날 연휴",
+    "2025-01-28": "설날 연휴",
+    "2025-01-29": "설날",
+    "2025-01-30": "설날 연휴",
+    "2025-10-05": "추석 연휴",
+    "2025-10-06": "추석",
+    "2025-10-07": "추석 연휴",
+    "2025-10-08": "대체공휴일",
+    // 2026
+    "2026-01-01": "신정",
+    "2026-02-16": "설날 연휴",
+    "2026-02-17": "설날",
+    "2026-02-18": "설날 연휴",
+    "2026-02-19": "대체공휴일",
+    "2026-09-24": "추석 연휴",
+    "2026-09-25": "추석",
+    "2026-09-26": "추석 연휴",
+    // 2027
+    "2027-01-01": "신정",
+    "2027-02-06": "설날 연휴",
+    "2027-02-07": "설날",
+    "2027-02-08": "설날 연휴",
+    "2027-02-09": "대체공휴일",
+    "2027-09-14": "추석 연휴",
+    "2027-09-15": "추석",
+    "2027-09-16": "추석 연휴"
+  };
+
+  function isClosedDate(dateStr, dateObj) {
+    if (!dateObj) {
+      var p = dateStr.split("-");
+      dateObj = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+    }
+    // 매주 월요일 정기 휴무
+    if (dateObj.getDay() === 1) {
+      return { closed: true, reason: "매주 월요일은 정기 휴무일입니다. 다른 날짜를 선택해주세요." };
+    }
+    // 명절 연휴 휴무
+    if (HOLIDAYS[dateStr]) {
+      return { closed: true, reason: "해당 일자(" + dateStr + ")는 " + HOLIDAYS[dateStr] + " 휴무일입니다. 다른 날짜를 선택해주세요." };
+    }
+    return { closed: false };
+  }
+
   var viewYear = todayYear;
   var viewMonth = todayMonth;
 
@@ -2641,9 +2710,17 @@
       var dStr = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
       dayBtn.setAttribute("data-date", dStr);
 
-      if (dStr < todayStr) {
+      var dayDate = new Date(year, month, d);
+      var dayCheck = isClosedDate(dStr, dayDate);
+
+      if (dStr < todayStr || dayCheck.closed) {
         dayBtn.disabled = true;
         dayBtn.classList.add("is-disabled");
+        if (dayCheck.closed) {
+          dayBtn.classList.add("is-holiday");
+          dayBtn.title = dayCheck.reason;
+          dayBtn.setAttribute("aria-disabled", "true");
+        }
       }
       if (dStr === todayStr) {
         dayBtn.classList.add("is-today");
@@ -2745,8 +2822,16 @@
   }
 
   if (calToday) {
+    var todayClosed = isClosedDate(todayStr, now);
+    if (todayClosed.closed) {
+      calToday.disabled = true;
+      calToday.title = "오늘은 " + todayClosed.reason;
+      calToday.style.opacity = "0.35";
+      calToday.style.cursor = "not-allowed";
+    }
     calToday.addEventListener("click", function (e) {
       e.stopPropagation();
+      if (todayClosed.closed) return;
       dateInput.value = todayStr;
       hideCalendar();
       clearDateError();
@@ -2800,8 +2885,12 @@
       if (!isNaN(y) && !isNaN(m)) {
         renderCalendar(y, m);
       }
+      clearDateError();
     }
   });
+
+  dateInput.addEventListener("blur", clearDateError);
+  dateInput.addEventListener("change", clearDateError);
 
   function checkDate(v) {
     if (!v || !v.trim()) return "방문일을 입력해주세요.";
@@ -2816,6 +2905,10 @@
     }
     if (v < dateInput.min) {
       return "오늘 이후 날짜를 선택해주세요.";
+    }
+    var dayCheck = isClosedDate(v, dt);
+    if (dayCheck.closed) {
+      return dayCheck.reason;
     }
     return "";
   }
