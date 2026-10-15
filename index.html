@@ -657,12 +657,12 @@ html { scroll-behavior: smooth; }
   font-size: calc(var(--u) * 300); line-height: 1.3; letter-spacing: calc(var(--u) * -6); color: #9f9f8b; opacity: 0.14;
 }
 .diheir-space__imgs { width: 100%; margin-top: calc(var(--u) * -87); display: flex; gap: calc(var(--u) * 32); }
-.diheir-space__img { position: relative; flex: 1 1 0; min-width: 0; aspect-ratio: 550.33 / 448; overflow: hidden; background: #d9d9d9; }
-.diheir-space__img img { position: absolute; height: 100%; }
-.diheir-space__img::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.2); }
-.diheir-space__img--01 img { left: -13.42%; top: 0.05%; width: 135.15%; }
-.diheir-space__img--02 img { left: -14.49%; top: 0.08%; width: 156.85%; }
-.diheir-space__img--03 img { inset: 0; width: 100%; object-fit: cover; }
+.diheir-space__img { position: relative; flex: 1 1 0; min-width: 0; aspect-ratio: 550.33 / 448; overflow: hidden; background: #2e2d23; }
+.diheir-space__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.diheir-space__img::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.2); pointer-events: none; }
+.diheir-space__img--01 img { object-position: 45% center; }
+.diheir-space__img--02 img { object-position: 55% center; }
+.diheir-space__img--03 img { object-position: center; }
 
 /* ---------- 06_Section_brand ---------- */
 .diheir-brand { position: relative; overflow: hidden; background: #2e2d23; padding: calc(var(--u) * 60) calc(var(--u) * 100); display: flex; justify-content: center; }
@@ -675,7 +675,7 @@ html { scroll-behavior: smooth; }
 .diheir-brand__top span:last-child { text-align: right; }
 .diheir-brand .diheir-olive { width: calc(var(--u) * 651); height: calc(var(--u) * 621); left: calc(var(--u) * 1081); top: calc(var(--u) * -34); }
 .diheir-brand__bottom { position: relative; z-index: 1; display: flex; align-items: center; gap: calc(var(--u) * 48); }
-.diheir-brand__img { position: relative; flex: none; width: calc(var(--u) * 669); aspect-ratio: 669 / 779; overflow: hidden; background: #d9d9d9; }
+.diheir-brand__img { position: relative; flex: none; width: calc(var(--u) * 669); aspect-ratio: 669 / 779; overflow: hidden; background: #2e2d23; }
 .diheir-brand__img img { position: absolute; left: -3.74%; top: -10.15%; width: 116.31%; height: 128.66%; }
 .diheir-brand__img::after {
   content: ""; position: absolute; inset: 0;
