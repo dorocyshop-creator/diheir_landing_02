@@ -357,7 +357,7 @@ html { scroll-behavior: smooth; }
   transition: opacity 0.3s ease;
 }
 .diheir-collection__card:hover::after {
-  opacity: 0.6;
+  opacity: 0;
 }
 .diheir-collection__name {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
@@ -371,12 +371,10 @@ html { scroll-behavior: smooth; }
   text-align: center;
   pointer-events: none;
   opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 .diheir-collection__card:hover .diheir-collection__name {
-  opacity: 1;
-  visibility: visible;
+  opacity: 0;
 }
 .diheir-collection__bar {
   position: absolute; left: 50%; top: calc(var(--u) * 978); width: calc(var(--u) * 925); margin-left: calc(var(--u) * -467);
@@ -1013,10 +1011,10 @@ html { scroll-behavior: smooth; }
   .diheir-collection__card { width: calc(var(--u) * 560); aspect-ratio: 560 / 640; touch-action: pan-x pan-y; }
   .diheir-collection__card::after {
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 75%, rgba(0, 0, 0, 0.60) 100%), linear-gradient(0deg, rgba(0, 0, 0, 0.20) 0%, rgba(0, 0, 0, 0.20) 100%);
-    opacity: 1;
+    opacity: 0;
     transition: none;
   }
-  .diheir-collection__card:hover::after { opacity: 1; }
+  .diheir-collection__card:hover::after { opacity: 0; }
   .diheir-collection__name {
     top: auto;
     bottom: calc(var(--u) * 60);
@@ -1026,13 +1024,11 @@ html { scroll-behavior: smooth; }
     margin: 0;
     text-align: center;
     font-size: max(12px, calc(var(--u) * 44));
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
     transition: none;
   }
   .diheir-collection__card:hover .diheir-collection__name {
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
   }
   .diheir-collection__bar { top: calc(var(--u) * 923); width: calc(var(--u) * 627); margin-left: calc(var(--u) * -307); justify-content: center; gap: calc(var(--u) * 32); z-index: 10; }
   .diheir-collection__bar .diheir-progress { width: calc(var(--u) * 483); }
